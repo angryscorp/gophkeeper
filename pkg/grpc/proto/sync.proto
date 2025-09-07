@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package gophkeeper.v1;
+
+option go_package = "github.com/angryscorp/gophkeeper/pkg/grpc/sync";
+
+message RecordChange {
+  string record_id = 1; // UUID
+  int64 version = 2; // +1 on every local change
+  bool deleted = 3; // record is deleted
+  bytes nonce = 4; // AES-GCM nonce (12 bytes)
+  bytes ciphertext = 5; // encrypted data
+  bytes tag = 6; // AES-GCM authentication tag (16 bytes)
+  int64 updated_at_unix_ms = 7; // Last-Write-Wins
+  string operation_id = 8; // UUID (idempotency)
+}
+
+// Requires Authorization: Bearer <access_token>
+service SyncService {
+  rpc Pull(PullRequest) returns (PullResponse);
+  rpc Push(PushRequest) returns (PushResponse);
+}
+
+message PullRequest {
+  int64 cursor = 1; // server_seq
+  int32 limit = 2;
+}
+
+message PullResponse {
+  repeated ChangeEnvelope changes = 1;
+  int64 next_cursor = 2;
+  bool has_more = 3;
+}
+
+message ChangeEnvelope {
+  int64 cursor = 1; // server_seq
+  RecordChange change = 2;
+}
+
+message PushRequest {
+  repeated RecordChange changes = 1;
+}
+
+message PushResponse {
+  repeated PushResult results = 1;
+}
+
+message PushResult {
+  string record_id = 1;
+  PushStatus status = 2;
+}
+
+enum PushStatus {
+  PUSH_STATUS_UNSPECIFIED = 0;
+  APPLIED = 1;
+  STALE = 2; // server has a newer version
+  CONFLICT = 3; // server has this version, but with different content
+  DUPLICATE = 4; // the record was already processed
+}

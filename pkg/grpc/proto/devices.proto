@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package gophkeeper.v1;
+
+option go_package = "github.com/angryscorp/gophkeeper/pkg/grpc/devices";
+
+message Device {
+  string id = 1;
+  string name = 2;
+  int64 created_at_unix = 3;
+  int64 last_seen_unix = 4;
+}
+
+// Requires Authorization: Bearer <access_token>
+service DeviceService {
+  rpc ListDevices(ListDevicesRequest) returns (ListDevicesResponse);
+  rpc RevokeDevice(RevokeDeviceRequest) returns (RevokeDeviceResponse);
+}
+
+message ListDevicesRequest {}
+
+message ListDevicesResponse {
+  repeated Device devices = 1;
+}
+
+message RevokeDeviceRequest {
+  string device_id = 1;
+}
+
+message RevokeDeviceResponse {}
