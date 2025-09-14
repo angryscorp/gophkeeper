@@ -5,14 +5,14 @@ package gophkeeper.v1;
 option go_package = "github.com/angryscorp/gophkeeper/pkg/grpc/sync";
 
 message RecordChange {
-  string record_id = 1; // UUID
-  int64 version = 2; // +1 on every local change
-  bool deleted = 3; // record is deleted
-  bytes nonce = 4; // AES-GCM nonce (12 bytes)
-  bytes ciphertext = 5; // encrypted data
-  bytes tag = 6; // AES-GCM authentication tag (16 bytes)
+  string record_id = 1;         // UUID
+  int64 version = 2;            // +1 on every local change
+  bool deleted = 3;             // record is deleted
+  bytes nonce = 4;              // AES-GCM nonce (12 bytes)
+  bytes ciphertext = 5;         // encrypted data
+  bytes tag = 6;                // AES-GCM authentication tag (16 bytes)
   int64 updated_at_unix_ms = 7; // Last-Write-Wins
-  string operation_id = 8; // UUID (idempotency)
+  string operation_id = 8;      // UUID (idempotency)
 }
 
 // Requires Authorization: Bearer <access_token>
@@ -53,7 +53,7 @@ message PushResult {
 enum PushStatus {
   PUSH_STATUS_UNSPECIFIED = 0;
   APPLIED = 1;
-  STALE = 2; // server has a newer version
-  CONFLICT = 3; // server has this version, but with different content
-  DUPLICATE = 4; // the record was already processed
+  STALE = 2;      // server has a newer version
+  CONFLICT = 3;   // server has this version, but with different content
+  DUPLICATE = 4;  // the record was already processed
 }
