@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"gophkeeper/server/internal/config"
 	"gophkeeper/server/internal/repository/migration"
@@ -12,7 +13,7 @@ func main() {
 	fmt.Println("hello world - server")
 
 	cfg := config.Config{
-		DatabaseDSN: "",
+		DatabaseDSN: "postgres://db_user:db_password@postgres:5432/gophkeeper?sslmode=disable",
 		Debug:       true,
 	}
 
@@ -28,4 +29,12 @@ func main() {
 	defer closeDB()
 
 	fmt.Println(repository)
+
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		fmt.Printf("tick - %s\n", time.Now())
+	}
+
 }
