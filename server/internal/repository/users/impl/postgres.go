@@ -17,16 +17,16 @@ type Users struct {
 	pool    *pgxpool.Pool
 }
 
-func New(dsn string) (*Users, error) {
+func New(dsn string) (*Users, func(), error) {
 	pool, err := pgx.CreatePGXPool(dsn)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create pool: %w", err)
+		return nil, func() {}, fmt.Errorf("failed to create pool: %w", err)
 	}
 
 	return &Users{
 		queries: db.New(pool),
 		pool:    pool,
-	}, nil
+	}, pool.Close, nil
 }
 
 var _ users.Users = (*Users)(nil)

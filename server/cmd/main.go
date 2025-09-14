@@ -10,7 +10,7 @@ import (
 
 func main() {
 	fmt.Println("hello world - server")
-	
+
 	cfg := config.Config{
 		DatabaseDSN: "",
 		Debug:       true,
@@ -20,10 +20,12 @@ func main() {
 		panic(err)
 	}
 
-	repository, err := usersrepo.New(cfg.DatabaseDSN)
+	repository, closeDB, err := usersrepo.New(cfg.DatabaseDSN)
 	if err != nil {
 		panic(err)
 	}
+
+	defer closeDB()
 
 	fmt.Println(repository)
 }

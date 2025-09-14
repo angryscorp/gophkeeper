@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
+	"gophkeeper/pkg/sqlite"
 
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
@@ -27,6 +28,8 @@ func MigrateSQLite(dsn, hexMasterKey string) error {
 		return err
 	}
 
+	sqlite.Setup(db)
+	
 	goose.SetBaseFS(embedMigrations)
 	if err := goose.SetDialect("sqlite3"); err != nil {
 		return err

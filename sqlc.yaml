@@ -12,3 +12,13 @@ sql:
         overrides:
           - db_type: "uuid"
             go_type: "github.com/google/uuid.UUID"
+
+  - engine: "sqlite"
+    queries: "./client/internal/repository/tokens/queries"
+    schema: "./client/internal/repository/migration/migrations"
+    gen:
+      go:
+        package: "db"
+        out: "./client/internal/repository/tokens/db"
+        sql_package: "database/sql"
+        omit_unused_structs: true
