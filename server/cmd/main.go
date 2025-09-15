@@ -2,11 +2,18 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"gophkeeper/pkg/grpc/auth"
+
+	authimpl "gophkeeper/server/internal/grpc/auth"
 
 	"gophkeeper/server/internal/config"
 	"gophkeeper/server/internal/repository/migration"
 	usersrepo "gophkeeper/server/internal/repository/users/impl"
+	"log"
+	"net"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -21,20 +28,26 @@ func main() {
 		panic(err)
 	}
 
-	repository, closeDB, err := usersrepo.New(cfg.DatabaseDSN)
+	_, closeDB, err := usersrepo.New(cfg.DatabaseDSN)
 	if err != nil {
 		panic(err)
 	}
 
 	defer closeDB()
 
-	fmt.Println(repository)
-
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		fmt.Printf("tick - %s\n", time.Now())
+	// start gRPC server
+	lis, err := net.Listen("tcp", ":8443")
+	if err != nil {
+		panic(err)
 	}
 
+	grpcServer := grpc.NewServer()
+	auth.RegisterAuthServiceServer(grpcServer, authimpl.New())
+
+	reflection.Register(grpcServer)
+
+	log.Printf("Auth gRPC server started")
+	if err := grpcServer.Serve(lis); err != nil {
+		panic(err)
+	}
 }

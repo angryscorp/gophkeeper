@@ -36,7 +36,7 @@ message RegisterRequest {
   string username = 1;
   KdfParams kdf = 2;
   bytes encrypted_data_key = 3; // EDK = Enc(MasterKey, DataKey)
-  bytes auth_key = 4; // HKDF(DataKey, "auth")
+  bytes auth_key = 4;           // HKDF(DataKey, "auth")
   AuthKeyAlg auth_key_alg = 5;
 }
 
@@ -51,13 +51,13 @@ message LoginStartResponse {
   string device_id = 1;
   KdfParams kdf = 2;
   bytes encrypted_data_key = 3; // need to client to get DataKey
-  AuthKeyAlg auth_key_alg = 4; // reminder to client how to calculate
-  bytes challenge = 5; // one-time challenge
+  AuthKeyAlg auth_key_alg = 4;  // reminder to client how to calculate
+  bytes challenge = 5;          // one-time challenge
 }
 
 message LoginFinishRequest {
   string device_id = 1;
-  bytes response = 2; // HMAC(DataKey, challenge)
+  bytes response = 2;   // HMAC(DataKey, challenge)
 }
 
 message LoginFinishResponse {
