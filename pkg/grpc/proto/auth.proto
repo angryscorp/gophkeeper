@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package gophkeeper.v1;
 
-option go_package = "github.com/angryscorp/gophkeeper/pkg/grpc/auth";
+option go_package = "gophkeeper/pkg/grpc/auth";
 
 enum KdfAlg {
   KDF_ALG_UNSPECIFIED = 0;

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package gophkeeper.v1;
 
-option go_package = "github.com/angryscorp/gophkeeper/pkg/grpc/devices";
+option go_package = "gophkeeper/pkg/grpc/devices";
 
 message Device {
   string id = 1;

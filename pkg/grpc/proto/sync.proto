@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package gophkeeper.v1;
 
-option go_package = "github.com/angryscorp/gophkeeper/pkg/grpc/sync";
+option go_package = "gophkeeper/pkg/grpc/sync";
 
 message RecordChange {
   string record_id = 1;         // UUID

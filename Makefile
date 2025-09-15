@@ -23,3 +23,10 @@ restart: stop start
 .PHONY: client
 client:
 	go run client/cmd/*.go
+
+.PHONY: proto
+proto:
+	protoc -I pkg/grpc/proto \
+	  --go_out=./.. \
+	  --go-grpc_out=./.. \
+	  pkg/grpc/proto/*.proto
