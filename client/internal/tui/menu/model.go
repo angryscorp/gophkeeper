@@ -6,6 +6,7 @@ import (
 	"gophkeeper/client/internal/tui/help"
 	"gophkeeper/client/internal/tui/list"
 	"gophkeeper/client/internal/tui/record"
+	"gophkeeper/client/internal/tui/register"
 	"gophkeeper/client/internal/tui/sync"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -15,6 +16,7 @@ type route int
 
 const (
 	routeMenu route = iota
+	routeRegister
 	routeAuth
 	routeSync
 	routeData
@@ -33,6 +35,7 @@ type Model struct {
 	route  route
 	items  []menuItem
 	cursor int
+	reg    register.Model
 	auth   auth.Model
 	sync   sync.Model
 	data   list.Model
@@ -44,7 +47,8 @@ func New() Model {
 	return Model{
 		route: routeMenu,
 		items: []menuItem{
-			{"Register/Login", routeAuth, func(m *Model) tea.Cmd { m.auth = auth.New(); return nil }},
+			{"Register", routeRegister, func(m *Model) tea.Cmd { m.reg = register.New(); return nil }},
+			{"Login", routeAuth, func(m *Model) tea.Cmd { m.auth = auth.New(); return nil }},
 			{"Sync", routeSync, func(m *Model) tea.Cmd { m.sync = sync.New(); return nil }},
 			{"Private Data", routeData, func(m *Model) tea.Cmd { m.data = list.New(nil); return tea.WindowSize() }},
 			{"Add New Item", routeNewItem, func(m *Model) tea.Cmd { m.record = record.New(); return nil }},

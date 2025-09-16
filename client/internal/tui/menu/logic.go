@@ -13,7 +13,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case routeMenu:
 		return m.update(msg)
 
-	case routeAuth, routeSync, routeData, routeNewItem, routeHelp:
+	case routeRegister, routeAuth, routeSync, routeData, routeNewItem, routeHelp:
 		return handleSubModelUpdate(&m, msg)
 
 	default:
@@ -25,6 +25,8 @@ func (m Model) View() string {
 	switch m.route {
 	case routeMenu:
 		return m.view()
+	case routeRegister:
+		return m.reg.View()
 	case routeAuth:
 		return m.auth.View()
 	case routeSync:
@@ -48,6 +50,8 @@ func handleSubModelUpdate(m *Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 	switch m.route {
+	case routeRegister:
+		m.reg, cmd = updateSubModel(m.reg, msg)
 	case routeAuth:
 		m.auth, cmd = updateSubModel(m.auth, msg)
 	case routeSync:
