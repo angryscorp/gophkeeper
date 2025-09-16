@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"crypto/rand"
+	"gophkeeper/pkg/crypto"
 	"gophkeeper/pkg/grpc/auth"
 
 	"google.golang.org/grpc"
@@ -16,28 +16,19 @@ func New(conn *grpc.ClientConn) *Client {
 	return &Client{client: auth.NewAuthServiceClient(conn)}
 }
 
-func (c Client) Register(ctx context.Context, username string) (*auth.RegisterResponse, error) {
-	kdf := &auth.KdfParams{
-		Alg:         auth.KdfAlg_ARGON2ID,
-		TimeCost:    3,
-		MemoryCost:  64 * 1024,
-		Parallelism: 1,
-		Salt:        randBytes(16),
-	}
-
-	regReq := &auth.RegisterRequest{
+func (c Client) Register(ctx context.Context, username string, kdf crypto.KDFParameters, edKey, authKey []byte, algorithm crypto.AuthKeyAlgorithm) error {
+	req := &auth.RegisterRequest{
 		Username:         username,
-		Kdf:              kdf,
-		EncryptedDataKey: []byte("EncryptedDataKey"),
-		AuthKey:          []byte("AuthKey"),
-		AuthKeyAlg:       auth.AuthKeyAlg_HMAC_SHA256,
+		Kdf:              mapKDFToGRPC(kdf),
+		EncryptedDataKey: edKey,
+		AuthKey:          authKey,
+		AuthKeyAlg:       mapAuthAlgoToRPC(algorithm),
 	}
 
-	return c.client.Register(ctx, regReq)
-}
+	_, err := c.client.Register(ctx, req)
+	if err != nil {
+		return err
+	}
 
-func randBytes(n int) []byte {
-	b := make([]byte, n)
-	_, _ = rand.Read(b)
-	return b
+	return nil
 }

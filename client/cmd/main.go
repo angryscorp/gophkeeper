@@ -1,13 +1,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"gophkeeper/client/internal/config"
 	"gophkeeper/client/internal/grpc/auth"
 	"gophkeeper/client/internal/repository/migration"
 	tokenrepo "gophkeeper/client/internal/repository/tokens/impl"
 	"gophkeeper/client/internal/tui/menu"
+	usecaseAuth "gophkeeper/client/internal/usecase/auth"
 	"log"
 	"os"
 
@@ -53,20 +53,20 @@ func main() {
 	if err != nil {
 		log.Fatalf("connect: %v", err)
 	}
-
-	defer func() {
-		_ = conn.Close()
-	}()
+	defer func() { _ = conn.Close() }()
 
 	// grpc client
 	authClient := auth.New(conn)
 
+	// usecase
+	authUsecase := usecaseAuth.NewAuth(authClient)
+
 	// test call
-	resp, err := authClient.Register(context.Background(), "test_username")
+	err = authUsecase.Register("test_username")
 	if err != nil {
 		log.Fatalf("Register error: %v", err)
 	}
-	fmt.Printf("Response OK: %+v\n", resp)
+	fmt.Printf("Response OK\n")
 
 	// TUI
 	program := tea.NewProgram(menu.New(), tea.WithAltScreen())
