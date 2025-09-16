@@ -44,6 +44,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 	auth.RegisterAuthServiceServer(grpcServer, authimpl.New())
 
+	// for debug
 	reflection.Register(grpcServer)
 
 	log.Printf("Auth gRPC server started")
