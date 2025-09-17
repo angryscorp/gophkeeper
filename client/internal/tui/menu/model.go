@@ -8,6 +8,7 @@ import (
 	"gophkeeper/client/internal/tui/record"
 	"gophkeeper/client/internal/tui/register"
 	"gophkeeper/client/internal/tui/sync"
+	usecaseAuth "gophkeeper/client/internal/usecase/auth"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -43,11 +44,13 @@ type Model struct {
 	help   help.Model
 }
 
-func New() Model {
+func New(
+	regFactory func() *usecaseAuth.Auth,
+) Model {
 	return Model{
 		route: routeMenu,
 		items: []menuItem{
-			{"Register", routeRegister, func(m *Model) tea.Cmd { m.reg = register.New(); return nil }},
+			{"Register", routeRegister, func(m *Model) tea.Cmd { m.reg = register.New(regFactory()); return m.reg.Init() }},
 			{"Login", routeAuth, func(m *Model) tea.Cmd { m.auth = auth.New(); return nil }},
 			{"Sync", routeSync, func(m *Model) tea.Cmd { m.sync = sync.New(); return nil }},
 			{"Private Data", routeData, func(m *Model) tea.Cmd { m.data = list.New(nil); return tea.WindowSize() }},

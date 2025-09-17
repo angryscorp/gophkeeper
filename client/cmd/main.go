@@ -69,7 +69,8 @@ func main() {
 	fmt.Printf("Response OK\n")
 
 	// TUI
-	program := tea.NewProgram(menu.New(), tea.WithAltScreen())
+	mainMenu := menu.New(func() *usecaseAuth.Auth { return authUsecase })
+	program := tea.NewProgram(mainMenu, tea.WithAltScreen())
 	if _, err := program.Run(); err != nil {
 		fmt.Printf("Something went wrong: %v", err)
 		os.Exit(1)
