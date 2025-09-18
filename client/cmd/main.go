@@ -61,13 +61,6 @@ func main() {
 	// usecase
 	authUsecase := usecaseAuth.NewAuth(authClient)
 
-	// test call
-	err = authUsecase.Register("test_username")
-	if err != nil {
-		log.Fatalf("Register error: %v", err)
-	}
-	fmt.Printf("Response OK\n")
-
 	// TUI
 	mainMenu := menu.New(func() *usecaseAuth.Auth { return authUsecase })
 	program := tea.NewProgram(mainMenu, tea.WithAltScreen())

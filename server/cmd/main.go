@@ -5,6 +5,7 @@ import (
 	"gophkeeper/pkg/grpc/auth"
 
 	authimpl "gophkeeper/server/internal/grpc/auth"
+	usecaseauth "gophkeeper/server/internal/usecase/auth"
 
 	"gophkeeper/server/internal/config"
 	"gophkeeper/server/internal/repository/migration"
@@ -28,12 +29,15 @@ func main() {
 		panic(err)
 	}
 
-	_, closeDB, err := usersrepo.New(cfg.DatabaseDSN)
+	repo, closeDB, err := usersrepo.New(cfg.DatabaseDSN)
 	if err != nil {
 		panic(err)
 	}
 
 	defer closeDB()
+
+	// usecase
+	usecase := usecaseauth.New(repo)
 
 	// start gRPC server
 	lis, err := net.Listen("tcp", ":8443")
@@ -42,7 +46,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	auth.RegisterAuthServiceServer(grpcServer, authimpl.New())
+	auth.RegisterAuthServiceServer(grpcServer, authimpl.New(usecase))
 
 	// for debug
 	reflection.Register(grpcServer)

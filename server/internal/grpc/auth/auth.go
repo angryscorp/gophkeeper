@@ -5,19 +5,25 @@ import (
 	"time"
 
 	"gophkeeper/pkg/grpc/auth"
+	usecaseAuth "gophkeeper/server/internal/usecase/auth"
 )
 
 type Server struct {
 	auth.UnimplementedAuthServiceServer
+	usecase *usecaseAuth.Auth
 }
 
-func New() *Server {
-	return &Server{}
+func New(usecase *usecaseAuth.Auth) *Server {
+	return &Server{usecase: usecase}
 }
 
 var _ auth.AuthServiceServer = (*Server)(nil)
 
 func (s *Server) Register(ctx context.Context, req *auth.RegisterRequest) (*auth.RegisterResponse, error) {
+	err := s.usecase.Register(ctx, req.Username)
+	if err != nil {
+		return nil, err
+	}
 	return &auth.RegisterResponse{}, nil
 }
 

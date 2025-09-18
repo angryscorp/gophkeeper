@@ -41,3 +41,10 @@ func (u Users) Get(ctx context.Context) ([]domain.User, error) {
 		return domain.User{ID: item.ID, Username: item.Username}
 	}), nil
 }
+
+func (u Users) Add(ctx context.Context, user domain.User) error {
+	return u.queries.Add(ctx, db.AddParams{
+		ID:       user.ID,
+		Username: user.Username,
+	})
+}
