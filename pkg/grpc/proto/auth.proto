@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package gophkeeper.v1;
+
+option go_package = "gophkeeper/pkg/grpc/auth";
+
+enum KdfAlg {
+  KDF_ALG_UNSPECIFIED = 0;
+  ARGON2ID = 1;
+}
+
+enum AuthKeyAlg {
+  AUTH_KEY_ALG_UNSPECIFIED = 0;
+  HMAC_SHA256 = 1;
+  HMAC_SHA512 = 2;
+}
+
+message KdfParams {
+  KdfAlg alg = 1;
+  uint32 time_cost = 2;
+  uint32 memory_cost = 3;
+  uint32 parallelism = 4;
+  bytes  salt = 5;
+}
+
+service AuthService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc LoginStart(LoginStartRequest) returns (LoginStartResponse);
+  rpc LoginFinish(LoginFinishRequest) returns (LoginFinishResponse);
+  rpc RefreshToken(RefreshRequest) returns (RefreshResponse);
+  // Requires Authorization: Bearer <access_token>
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+}
+
+message RegisterRequest {
+  string username = 1;
+  KdfParams kdf = 2;
+  bytes encrypted_data_key = 3; // EDK = Enc(MasterKey, DataKey)
+  bytes auth_key = 4;           // HKDF(DataKey, "auth")
+  AuthKeyAlg auth_key_alg = 5;
+}
+
+message RegisterResponse {}
+
+message LoginStartRequest {
+  string username = 1;
+  string device_name = 2;
+}
+
+message LoginStartResponse {
+  string device_id = 1;
+  KdfParams kdf = 2;
+  bytes encrypted_data_key = 3; // need to client to get DataKey
+  AuthKeyAlg auth_key_alg = 4;  // reminder to client how to calculate
+  bytes challenge = 5;          // one-time challenge
+}
+
+message LoginFinishRequest {
+  string device_id = 1;
+  bytes response = 2;   // HMAC(DataKey, challenge)
+}
+
+message LoginFinishResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64  expires_at_unix = 3;
+}
+
+message RefreshRequest {
+  string refresh_token = 1;
+}
+
+message RefreshResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64  expires_at_unix = 3;
+}
+
+message ChangePasswordRequest {
+  KdfParams new_kdf = 1;
+  bytes new_encrypted_data_key = 2;
+}
+
+message ChangePasswordResponse {}

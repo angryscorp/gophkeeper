@@ -31,5 +31,10 @@ go.work.sum
 .idea/
 .vscode/
 
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
 # Other
 *.DS_Store
