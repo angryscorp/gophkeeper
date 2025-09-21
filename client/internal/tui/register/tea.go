@@ -9,11 +9,12 @@ import (
 )
 
 type Model struct {
-	auth  *auth.Auth
-	state state
-	input textinput.Model
-	err   error
-	name  string
+	auth     *auth.Auth
+	state    state
+	input    textinput.Model
+	err      error
+	username string
+	password string
 }
 
 type state int
@@ -21,6 +22,7 @@ type state int
 const (
 	stateInit state = iota
 	stateAskUsername
+	stateAskPassword
 	stateInProgress
 	stateSuccess
 	stateError
@@ -34,12 +36,7 @@ func New(auth *auth.Auth) Model {
 	return Model{
 		auth:  auth,
 		state: stateInit,
-		input: func() textinput.Model {
-			ti := textinput.New()
-			ti.Prompt = "Enter username: "
-			ti.CharLimit = 64
-			return ti
-		}(),
+		input: textinput.New(),
 	}
 }
 
@@ -49,9 +46,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "enter":
 			if m.state == stateAskUsername {
-				m.name = m.input.Value()
-				if m.name == "" {
+				m.username = m.input.Value()
+				if m.username == "" {
 					m.err = fmt.Errorf("username cannot be empty")
+					m.state = stateError
+					return m, nil
+				}
+				m.state = stateAskPassword
+				return m, cmdAskPassword.Run
+			}
+
+			if m.state == stateAskPassword {
+				m.password = m.input.Value()
+				if m.password == "" {
+					m.err = fmt.Errorf("password cannot be empty")
 					m.state = stateError
 					return m, nil
 				}
@@ -60,7 +68,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		default:
-			if m.state == stateAskUsername {
+			if m.state == stateAskUsername || m.state == stateAskPassword {
 				var cmd tea.Cmd
 				m.input, cmd = m.input.Update(msg)
 				return m, cmd
@@ -70,12 +78,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case baseCmd:
 		switch msg {
 		case cmdAskUsername:
+			m.input.Prompt = "Enter username: "
+			m.input.EchoMode = textinput.EchoNormal
+			m.input.SetValue("")
 			m.state = stateAskUsername
+			return m, m.input.Focus()
+
+		case cmdAskPassword:
+			m.input.Prompt = "Enter password: "
+			m.input.EchoMode = textinput.EchoPassword
+			m.input.SetValue("")
+			m.state = stateAskPassword
 			return m, m.input.Focus()
 
 		case cmdSendRequest:
 			m.state = stateInProgress
-			return m, m.doRegister(m.name)
+			return m, m.doRegister(m.username, m.password)
 		}
 
 	case resultMsg:
@@ -84,7 +102,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.err = msg.err
 			m.state = stateError
-
 		}
 		return m, nil
 	}
@@ -95,7 +112,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) View() string {
 	title := "REGISTER"
 	switch m.state {
-	case stateAskUsername:
+	case stateAskUsername, stateAskPassword:
 		return fmt.Sprintf("%s\n\n%s", title, m.input.View())
 	case stateInProgress:
 		return fmt.Sprintf("%s\n\nsending request...", title)
@@ -108,9 +125,9 @@ func (m Model) View() string {
 	}
 }
 
-func (m Model) doRegister(username string) tea.Cmd {
+func (m Model) doRegister(username, password string) tea.Cmd {
 	return func() tea.Msg {
-		err := m.auth.Register(username)
+		err := m.auth.Register(username, password)
 		return resultMsg{
 			success: err == nil,
 			err:     err,

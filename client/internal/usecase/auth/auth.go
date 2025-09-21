@@ -2,22 +2,28 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"gophkeeper/client/internal/repository/tokens"
 	"gophkeeper/pkg/crypto"
 	"time"
 )
 
-type GRPCClient interface {
+const (
+	authContext = "auth"
+	ctxTimeout  = 5 * time.Second
+)
+
+type Client interface {
 	Register(ctx context.Context, username string, kdf crypto.KDFParameters, edKey, authKey []byte, algorithm crypto.AuthKeyAlgorithm) error
 }
 
 type Auth struct {
-	client GRPCClient
+	client Client
 	repo   tokens.Tokens
 }
 
-func NewAuth(
-	client GRPCClient,
+func New(
+	client Client,
 	repo tokens.Tokens,
 ) *Auth {
 	return &Auth{
@@ -26,24 +32,40 @@ func NewAuth(
 	}
 }
 
-func (a *Auth) Register(username string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func (auth *Auth) Register(username, password string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	kdf := crypto.KDFParameters{
-		Algorithm:   crypto.KDFAlgorithmARGON2ID,
-		TimeCost:    3,
-		MemoryCost:  64 * 1024,
-		Parallelism: 1,
-		Salt:        crypto.RandBytes(16),
+	kdfParams := crypto.DefaultKDFParameters()
+
+	// Generate a master key
+	masterKey, err := crypto.DeriveKey(password, kdfParams)
+	if err != nil {
+		return fmt.Errorf("failed to derive key: %w", err)
 	}
 
-	return a.client.Register(
+	// Generate a data key
+	dataKey := crypto.RandBytes(32)
+
+	// Encrypt the data key with the master key
+	encryptedDataKey, err := crypto.Encrypt(masterKey, dataKey)
+	if err != nil {
+		return err
+	}
+
+	// Generate an auth key from the data key
+	authKey, err := crypto.DeriveAuthKey(dataKey, []byte(authContext))
+	if err != nil {
+		return err
+	}
+
+	return auth.client.Register(
 		ctx,
 		username,
-		kdf,
-		[]byte("ed-key-stub"),
-		[]byte("auth-stub"),
-		crypto.AuthKeyAlgorithmHMACSHA256,
+		kdfParams,
+		encryptedDataKey,
+		authKey,
+		crypto.DefaultAuthKeyAlgorithm(),
 	)
+
 }

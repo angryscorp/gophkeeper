@@ -25,6 +25,8 @@ func mapAuthAlgoToRPC(algorithm crypto.AuthKeyAlgorithm) auth.AuthKeyAlg {
 	switch algorithm {
 	case crypto.AuthKeyAlgorithmHMACSHA256:
 		authAlgorithm = auth.AuthKeyAlg_HMAC_SHA256
+	case crypto.AuthKeyAlgorithmHMACSHA512:
+		authAlgorithm = auth.AuthKeyAlg_HMAC_SHA512
 	}
 	return authAlgorithm
 }

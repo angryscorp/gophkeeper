@@ -2,10 +2,10 @@ package main
 
 import (
 	"gophkeeper/client/internal/config"
-	"gophkeeper/client/internal/grpc/auth"
+	grpcauth "gophkeeper/client/internal/grpc/auth"
 	tokenrepo "gophkeeper/client/internal/repository/tokens/impl"
 	"gophkeeper/client/internal/tui/menu"
-	usecaseAuth "gophkeeper/client/internal/usecase/auth"
+	"gophkeeper/client/internal/usecase/auth"
 	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -23,24 +23,21 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	}
 	closeFuncs = append(closeFuncs, closeDB)
 
-	// grpc client conn
+	// gRPC client connection
 	conn, err := grpc.NewClient(
 		cfg.ServerAddr,
-		grpc.WithTransportCredentials(insecure.NewCredentials()), // dial plaintext (dev)
+		grpc.WithTransportCredentials(insecure.NewCredentials()), // dial plaintext (debug)
 	)
 	if err != nil {
 		log.Fatalf("connect: %v", err)
 	}
 	closeFuncs = append(closeFuncs, func() { _ = conn.Close() })
 
-	// grpc client
-	authClient := auth.New(conn)
-
-	// usecase
-	authUsecase := usecaseAuth.NewAuth(authClient, repo)
+	// gRPC client
+	authClient := grpcauth.New(conn)
 
 	// TUI
-	mainMenu := menu.New(func() *usecaseAuth.Auth { return authUsecase })
+	mainMenu := menu.New(func() *auth.Auth { return auth.New(authClient, repo) })
 	program := tea.NewProgram(mainMenu, tea.WithAltScreen())
 
 	return program, closeFuncs

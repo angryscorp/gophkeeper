@@ -6,6 +6,7 @@ type baseCmd int
 
 const (
 	cmdAskUsername baseCmd = iota
+	cmdAskPassword
 	cmdSendRequest
 )
 
