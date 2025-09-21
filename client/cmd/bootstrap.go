@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"gophkeeper/client/internal/config"
 	"gophkeeper/client/internal/grpc/auth"
 	tokenrepo "gophkeeper/client/internal/repository/tokens/impl"
@@ -18,13 +17,11 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	var closeFuncs []func()
 
 	// Repositories initialization
-	repo, closeDB, err := tokenrepo.New(cfg.DatabaseDSN, "hexMasterKey")
+	repo, closeDB, err := tokenrepo.New(cfg.DatabaseDSN(), "hexMasterKey")
 	if err != nil {
 		panic(err)
 	}
 	closeFuncs = append(closeFuncs, closeDB)
-
-	fmt.Println(repo)
 
 	// grpc client conn
 	conn, err := grpc.NewClient(
@@ -40,7 +37,7 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	authClient := auth.New(conn)
 
 	// usecase
-	authUsecase := usecaseAuth.NewAuth(authClient)
+	authUsecase := usecaseAuth.NewAuth(authClient, repo)
 
 	// TUI
 	mainMenu := menu.New(func() *usecaseAuth.Auth { return authUsecase })

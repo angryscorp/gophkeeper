@@ -3,7 +3,6 @@ package register
 import (
 	"fmt"
 	"gophkeeper/client/internal/usecase/auth"
-	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -94,23 +93,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
+	title := "REGISTER"
 	switch m.state {
 	case stateAskUsername:
-		return fmt.Sprintf("REGISTER\n\n%s\n\n[Enter] continue • [q] quit", m.input.View())
+		return fmt.Sprintf("%s\n\n%s", title, m.input.View())
 	case stateInProgress:
-		return "REGISTER\n\nsending request...\n\n[q] quit"
+		return fmt.Sprintf("%s\n\nsending request...", title)
 	case stateSuccess:
-		return fmt.Sprintf("REGISTER\n\nok! username=%q\n\n[q] quit", m.name)
+		return fmt.Sprintf("%s\n\nRegistration is successful", title)
 	case stateError:
-		return fmt.Sprintf("REGISTER\n\nerror: %v\n\n[q] quit", m.err)
+		return fmt.Sprintf("%s\n\nRegistration failed: %v", title, m.err)
 	default:
-		return "REGISTER\n\n(initializing...)\n"
+		return fmt.Sprintf("%s\n\ninitializing...", title)
 	}
 }
 
 func (m Model) doRegister(username string) tea.Cmd {
 	return func() tea.Msg {
-		time.Sleep(2 * time.Second) // testing load state
 		err := m.auth.Register(username)
 		return resultMsg{
 			success: err == nil,

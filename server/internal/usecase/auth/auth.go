@@ -4,6 +4,7 @@ import (
 	"context"
 	"gophkeeper/server/internal/domain"
 	"gophkeeper/server/internal/repository/users"
+	"log"
 
 	"github.com/google/uuid"
 )
@@ -19,6 +20,7 @@ func New(repo users.Users) *Auth {
 }
 
 func (a *Auth) Register(ctx context.Context, username string) error {
+	log.Printf("Registering user: %s\n", username)
 	user := domain.User{
 		ID:       uuid.New(),
 		Username: username,

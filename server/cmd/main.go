@@ -7,19 +7,21 @@ import (
 )
 
 func main() {
-	cfg := config.Config{
-		DatabaseDSN: "postgres://db_user:db_password@postgres:5432/gophkeeper?sslmode=disable",
-		Debug:       true,
-		ServerAddr:  ":8443",
+	// Load configuration from env
+	cfg, err := config.LoadFromEnv()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// Database migrations
 	if err := migration.MigratePostgres(cfg.DatabaseDSN); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// gRPC server initialization
 	grpcServer, closeFuncs := bootstrap(cfg)
+
+	// Clean up resources after a graceful shutdown
 	defer func() {
 		for _, f := range closeFuncs {
 			f()

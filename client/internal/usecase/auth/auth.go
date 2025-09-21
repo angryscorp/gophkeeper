@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"gophkeeper/client/internal/repository/tokens"
 	"gophkeeper/pkg/crypto"
 	"time"
 )
@@ -12,11 +13,16 @@ type GRPCClient interface {
 
 type Auth struct {
 	client GRPCClient
+	repo   tokens.Tokens
 }
 
-func NewAuth(client GRPCClient) *Auth {
+func NewAuth(
+	client GRPCClient,
+	repo tokens.Tokens,
+) *Auth {
 	return &Auth{
 		client: client,
+		repo:   repo,
 	}
 }
 
