@@ -37,7 +37,11 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	authClient := grpcauth.New(conn)
 
 	// TUI
-	mainMenu := menu.New(func() *auth.Auth { return auth.New(authClient, repo) })
+	authUsecase := auth.New(authClient, repo)
+	mainMenu := menu.New(
+		authUsecase.Register,
+		authUsecase.Login,
+	)
 	program := tea.NewProgram(mainMenu, tea.WithAltScreen())
 
 	return program, closeFuncs

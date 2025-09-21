@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gophkeeper/client/internal/repository/tokens"
 	"gophkeeper/pkg/crypto"
+	"gophkeeper/pkg/device"
 	"time"
 )
 
@@ -15,6 +16,7 @@ const (
 
 type Client interface {
 	Register(ctx context.Context, username string, kdf crypto.KDFParameters, edKey, authKey []byte, algorithm crypto.AuthKeyAlgorithm) error
+	LoginStart(ctx context.Context, username string, deviceName string) error
 }
 
 type Auth struct {
@@ -68,4 +70,11 @@ func (auth *Auth) Register(username, password string) error {
 		crypto.DefaultAuthKeyAlgorithm(),
 	)
 
+}
+
+func (auth *Auth) Login(username string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
+	defer cancel()
+
+	return auth.client.LoginStart(ctx, username, device.GenerateDeviceName())
 }

@@ -32,3 +32,11 @@ func (c Client) Register(ctx context.Context, username string, kdf crypto.KDFPar
 
 	return nil
 }
+
+func (c Client) LoginStart(ctx context.Context, username string, deviceName string) error {
+	_, err := c.client.LoginStart(ctx, &auth.LoginStartRequest{Username: username, DeviceName: deviceName})
+	if err != nil {
+		return err
+	}
+	return nil
+}

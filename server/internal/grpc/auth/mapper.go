@@ -29,10 +29,29 @@ func kdfParametersToDomain(kdf *auth.KdfParams) crypto.KDFParameters {
 	}
 }
 
+func kdfParametersToGRPC(kdf crypto.KDFParameters) *auth.KdfParams {
+	return &auth.KdfParams{
+		Alg:         kdfAlgoToGRPC(kdf.Algorithm),
+		TimeCost:    kdf.TimeCost,
+		MemoryCost:  kdf.MemoryCost,
+		Parallelism: kdf.Parallelism,
+		Salt:        kdf.Salt,
+	}
+}
+
 func kdfAlgoToDomain(algo auth.KdfAlg) crypto.KDFAlgorithm {
 	switch algo {
 	case auth.KdfAlg_ARGON2ID:
 		return crypto.KDFAlgorithmARGON2ID
+	default:
+		panic("Unknown KDF algorithm")
+	}
+}
+
+func kdfAlgoToGRPC(algo crypto.KDFAlgorithm) auth.KdfAlg {
+	switch algo {
+	case crypto.KDFAlgorithmARGON2ID:
+		return auth.KdfAlg_ARGON2ID
 	default:
 		panic("Unknown KDF algorithm")
 	}
@@ -45,6 +64,17 @@ func authAlgoToDomain(algo auth.AuthKeyAlg) crypto.AuthKeyAlgorithm {
 	case auth.AuthKeyAlg_HMAC_SHA512:
 		return crypto.AuthKeyAlgorithmHMACSHA512
 	default:
-		panic("Unknown KDF algorithm")
+		panic("Unknown AuthKey algorithm")
+	}
+}
+
+func authAlgoToGRPC(algo crypto.AuthKeyAlgorithm) auth.AuthKeyAlg {
+	switch algo {
+	case crypto.AuthKeyAlgorithmHMACSHA256:
+		return auth.AuthKeyAlg_HMAC_SHA256
+	case crypto.AuthKeyAlgorithmHMACSHA512:
+		return auth.AuthKeyAlg_HMAC_SHA512
+	default:
+		panic("Unknown AuthKey algorithm")
 	}
 }

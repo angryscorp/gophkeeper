@@ -1,14 +1,5 @@
 package usecase
 
-// Sign-Up
-// - The user enters a username and master password
-// - The client calculates Master Key = Argon2id(password, salt, params)
-// - A random Data Key is generated → it encrypts all records
-// - The Data Key is encrypted by the Master Key → Encrypted Data Key
-// - AuthKey = HKDF(DataKey, "auth") is derived from the Data Key
-// - The following is sent to the server: login, salt+KDF parameters, Encrypted Data Key, AuthKey
-// - The server saves them, but does not know the password and does not store the keys in plain text
-
 // Sign-In
 // - The client receives from the server by username: salt + KDF parameters, Encrypted Data Key, and challenge
 // - The client calculates the Master Key by password → decrypts the Encrypted Data Key → receives the Data Key

@@ -28,12 +28,16 @@ func (s *Server) Register(ctx context.Context, req *auth.RegisterRequest) (*auth
 }
 
 func (s *Server) LoginStart(ctx context.Context, req *auth.LoginStartRequest) (*auth.LoginStartResponse, error) {
+	resp, err := s.usecase.LoginStart(ctx, req.Username)
+	if err != nil {
+		return nil, err
+	}
 	return &auth.LoginStartResponse{
-		DeviceId:         "dev-stub",
-		Kdf:              nil,
-		EncryptedDataKey: nil,
-		AuthKeyAlg:       auth.AuthKeyAlg_HMAC_SHA256,
-		Challenge:        []byte("1234"),
+		DeviceId:         resp.DeviceId,
+		Kdf:              kdfParametersToGRPC(resp.KDFParameters),
+		EncryptedDataKey: resp.EncryptedDataKey,
+		AuthKeyAlg:       authAlgoToGRPC(resp.AuthKeyAlgorithm),
+		Challenge:        resp.Challenge,
 	}, nil
 }
 

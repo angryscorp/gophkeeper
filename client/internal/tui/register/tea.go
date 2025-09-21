@@ -2,14 +2,13 @@ package register
 
 import (
 	"fmt"
-	"gophkeeper/client/internal/usecase/auth"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Model struct {
-	auth     *auth.Auth
+	signup   func(username, password string) error
 	state    state
 	input    textinput.Model
 	err      error
@@ -32,11 +31,11 @@ func (m Model) Init() tea.Cmd {
 	return cmdAskUsername.Run
 }
 
-func New(auth *auth.Auth) Model {
+func New(signup func(username, password string) error) Model {
 	return Model{
-		auth:  auth,
-		state: stateInit,
-		input: textinput.New(),
+		signup: signup,
+		state:  stateInit,
+		input:  textinput.New(),
 	}
 }
 
@@ -127,7 +126,7 @@ func (m Model) View() string {
 
 func (m Model) doRegister(username, password string) tea.Cmd {
 	return func() tea.Msg {
-		err := m.auth.Register(username, password)
+		err := m.signup(username, password)
 		return resultMsg{
 			success: err == nil,
 			err:     err,
