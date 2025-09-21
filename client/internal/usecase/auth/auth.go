@@ -17,6 +17,7 @@ const (
 type Client interface {
 	Register(ctx context.Context, username string, kdf crypto.KDFParameters, edKey, authKey []byte, algorithm crypto.AuthKeyAlgorithm) error
 	LoginStart(ctx context.Context, username string, deviceName string) (crypto.LoginPayload, error)
+	LoginFinish(ctx context.Context, deviceName string, challenge []byte) error
 }
 
 type Auth struct {
@@ -40,7 +41,7 @@ func (auth *Auth) Register(username, password string) error {
 
 	kdfParams := crypto.DefaultKDFParameters()
 
-	// Generate a master key
+	// Calculate a master key
 	masterKey, err := crypto.DeriveKey(password, kdfParams)
 	if err != nil {
 		return fmt.Errorf("failed to derive key: %w", err)
@@ -73,15 +74,37 @@ func (auth *Auth) Register(username, password string) error {
 }
 
 func (auth *Auth) Login(username, password string) error {
+	deviceName := device.GenerateDeviceName()
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	resp, err := auth.client.LoginStart(ctx, username, device.GenerateDeviceName())
+	// Start login
+	resp, err := auth.client.LoginStart(ctx, username, deviceName)
 	if err != nil {
 		return err
 	}
 
-	_ = resp
+	// Calculate a master key
+	masterKey, err := crypto.DeriveKey(password, resp.KDFParameters)
+	if err != nil {
+		return fmt.Errorf("failed to derive key: %w", err)
+	}
 
-	return nil
+	// Decrypt the data key
+	dataKey, err := crypto.Decrypt(masterKey, resp.EncryptedDataKey)
+	if err != nil {
+		return err
+	}
+
+	// Derive the auth key from the data key
+	authKey, err := crypto.DeriveAuthKey(dataKey, []byte(authContext))
+	if err != nil {
+		return err
+	}
+
+	// Create HMAC response for the challenge
+	challengeResponse := crypto.SignChallenge(authKey, resp.Challenge, resp.AuthKeyAlgorithm)
+
+	// Finish login
+	return auth.client.LoginFinish(ctx, deviceName, challengeResponse)
 }

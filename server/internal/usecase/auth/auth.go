@@ -2,6 +2,8 @@ package auth
 
 import (
 	"context"
+	"crypto/hmac"
+	"errors"
 	"gophkeeper/pkg/crypto"
 	"gophkeeper/server/internal/domain"
 	"gophkeeper/server/internal/repository/users"
@@ -35,6 +37,19 @@ func (auth *Auth) LoginStart(ctx context.Context, username, deviceId string) (cr
 		KDFParameters:    resp.KDFParameters,
 		EncryptedDataKey: resp.EncryptedDataKey,
 		AuthKeyAlgorithm: resp.AuthKeyAlgorithm,
-		Challenge:        crypto.RandBytes(8),
+		Challenge:        []byte("12345"),
 	}, nil
+}
+
+func (auth *Auth) LoginFinish(ctx context.Context, deviceName string, challenge []byte) error {
+	log.Printf("Finishing login: %s\n", deviceName)
+	resp, err := auth.repo.Get(ctx, "test_user")
+	if err != nil {
+		return err
+	}
+	expected := crypto.SignChallenge(resp.AuthKey, []byte("12345"), resp.AuthKeyAlgorithm)
+	if !hmac.Equal(expected, challenge) {
+		return errors.New("invalid challenge")
+	}
+	return nil
 }

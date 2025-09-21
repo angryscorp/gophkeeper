@@ -42,6 +42,11 @@ func (s *Server) LoginStart(ctx context.Context, req *auth.LoginStartRequest) (*
 }
 
 func (s *Server) LoginFinish(ctx context.Context, req *auth.LoginFinishRequest) (*auth.LoginFinishResponse, error) {
+	err := s.usecase.LoginFinish(ctx, req.DeviceId, req.Response)
+	if err != nil {
+		return nil, err
+	}
+
 	return &auth.LoginFinishResponse{
 		AccessToken:   "access-token",
 		RefreshToken:  "refresh-token",

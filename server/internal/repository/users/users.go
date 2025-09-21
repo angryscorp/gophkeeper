@@ -7,6 +7,7 @@ import (
 
 const (
 	UsernameIsAlreadyTaken = "username is already taken"
+	UsernameDoesNotExist   = "username does not exist"
 )
 
 type Users interface {

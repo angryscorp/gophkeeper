@@ -1,8 +1,11 @@
 package crypto
 
 import (
+	"crypto/hmac"
 	"crypto/sha256"
+	"crypto/sha512"
 	"fmt"
+	"hash"
 	"io"
 
 	"golang.org/x/crypto/argon2"
@@ -36,4 +39,19 @@ func DeriveAuthKey(key, info []byte) ([]byte, error) {
 	}
 
 	return authKey, nil
+}
+
+func SignChallenge(authKey, challenge []byte, algo AuthKeyAlgorithm) []byte {
+	var sha func() hash.Hash
+	switch algo {
+	case AuthKeyAlgorithmHMACSHA256:
+		sha = sha256.New
+	case AuthKeyAlgorithmHMACSHA512:
+		sha = sha512.New
+	default:
+		panic("Unknown AuthKey algorithm")
+	}
+	mac := hmac.New(sha, authKey)
+	mac.Write(challenge)
+	return mac.Sum(nil)
 }

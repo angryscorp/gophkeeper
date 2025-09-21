@@ -46,3 +46,17 @@ func (c Client) LoginStart(ctx context.Context, username string, deviceName stri
 		Challenge:        resp.Challenge,
 	}, nil
 }
+
+func (c Client) LoginFinish(ctx context.Context, deviceName string, challenge []byte) error {
+	resp, err := c.client.LoginFinish(ctx, &auth.LoginFinishRequest{
+		DeviceId: deviceName,
+		Response: challenge,
+	})
+	if err != nil {
+		return err
+	}
+
+	_ = resp
+
+	return nil
+}
