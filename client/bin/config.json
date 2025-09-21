@@ -1,0 +1,6 @@
+{
+  "db_file_name": "vault.db",
+  "busy_timeout_in_ms": 5000,
+  "server_addr": "localhost:8443",
+  "debug": true
+}

@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: db_user
+      POSTGRES_PASSWORD: db_password
+      POSTGRES_DB: gophkeeper
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U db_user -d gophkeeper"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+
+  gophkeeper-server:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    ports:
+      - "8443:8443"
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - SERVER_ADDR=:8443
+      - DATABASE_DNS=postgres://db_user:db_password@postgres:5432/gophkeeper?sslmode=disable
+      - DEBUG=true
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
