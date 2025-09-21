@@ -45,7 +45,7 @@ type Model struct {
 
 func New(
 	regFactory func(username, password string) error,
-	loginFactory func(username string) error,
+	loginFactory func(username, password string) error,
 ) Model {
 	return Model{
 		route: routeMenu,

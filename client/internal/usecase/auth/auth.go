@@ -16,7 +16,7 @@ const (
 
 type Client interface {
 	Register(ctx context.Context, username string, kdf crypto.KDFParameters, edKey, authKey []byte, algorithm crypto.AuthKeyAlgorithm) error
-	LoginStart(ctx context.Context, username string, deviceName string) error
+	LoginStart(ctx context.Context, username string, deviceName string) (crypto.LoginPayload, error)
 }
 
 type Auth struct {
@@ -72,9 +72,16 @@ func (auth *Auth) Register(username, password string) error {
 
 }
 
-func (auth *Auth) Login(username string) error {
+func (auth *Auth) Login(username, password string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	return auth.client.LoginStart(ctx, username, device.GenerateDeviceName())
+	resp, err := auth.client.LoginStart(ctx, username, device.GenerateDeviceName())
+	if err != nil {
+		return err
+	}
+
+	_ = resp
+
+	return nil
 }

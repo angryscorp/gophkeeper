@@ -11,31 +11,42 @@ import (
 	"github.com/google/uuid"
 )
 
-const get = `-- name: Get :many
-SELECT id, username FROM users
+const get = `-- name: Get :one
+SELECT
+    id, username, kdf_algorithm, kdf_time_cost, kdf_memory_cost, kdf_parallelism, kdf_salt, encrypted_data_key, auth_key, auth_key_algorithm
+FROM
+    users
+WHERE
+    username = $1
 `
 
 type GetRow struct {
-	ID       uuid.UUID
-	Username string
+	ID               uuid.UUID
+	Username         string
+	KdfAlgorithm     string
+	KdfTimeCost      int32
+	KdfMemoryCost    int32
+	KdfParallelism   int32
+	KdfSalt          []byte
+	EncryptedDataKey []byte
+	AuthKey          []byte
+	AuthKeyAlgorithm string
 }
 
-func (q *Queries) Get(ctx context.Context) ([]GetRow, error) {
-	rows, err := q.db.Query(ctx, get)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetRow
-	for rows.Next() {
-		var i GetRow
-		if err := rows.Scan(&i.ID, &i.Username); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) Get(ctx context.Context, username string) (GetRow, error) {
+	row := q.db.QueryRow(ctx, get, username)
+	var i GetRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.KdfAlgorithm,
+		&i.KdfTimeCost,
+		&i.KdfMemoryCost,
+		&i.KdfParallelism,
+		&i.KdfSalt,
+		&i.EncryptedDataKey,
+		&i.AuthKey,
+		&i.AuthKeyAlgorithm,
+	)
+	return i, err
 }

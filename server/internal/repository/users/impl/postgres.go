@@ -3,13 +3,13 @@ package impl
 import (
 	"context"
 	"fmt"
+	"gophkeeper/pkg/crypto"
 	"gophkeeper/pkg/pgx"
 	"gophkeeper/server/internal/domain"
 	"gophkeeper/server/internal/repository/users"
 	"gophkeeper/server/internal/repository/users/db"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/samber/lo"
 )
 
 type Users struct {
@@ -31,15 +31,26 @@ func New(dsn string) (*Users, func(), error) {
 
 var _ users.Users = (*Users)(nil)
 
-func (repo Users) Get(ctx context.Context) ([]domain.User, error) {
-	usernames, err := repo.queries.Get(ctx)
+func (repo Users) Get(ctx context.Context, username string) (domain.User, error) {
+	row, err := repo.queries.Get(ctx, username)
 	if err != nil {
-		return nil, err
+		return domain.User{}, err
 	}
 
-	return lo.Map(usernames, func(item db.GetRow, index int) domain.User {
-		return domain.User{ID: item.ID, Username: item.Username}
-	}), nil
+	return domain.User{
+		ID:       row.ID,
+		Username: row.Username,
+		KDFParameters: crypto.KDFParameters{
+			Algorithm:   crypto.KDFAlgorithm(row.KdfAlgorithm),
+			TimeCost:    uint32(row.KdfTimeCost),
+			MemoryCost:  uint32(row.KdfMemoryCost),
+			Parallelism: uint32(row.KdfParallelism),
+			Salt:        row.KdfSalt,
+		},
+		EncryptedDataKey: row.EncryptedDataKey,
+		AuthKeyAlgorithm: crypto.AuthKeyAlgorithm(row.AuthKeyAlgorithm),
+		AuthKey:          row.AuthKey,
+	}, nil
 }
 
 func (repo Users) Add(ctx context.Context, user domain.User) error {

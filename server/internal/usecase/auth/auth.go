@@ -18,18 +18,23 @@ func New(repo users.Users) *Auth {
 	}
 }
 
-func (a *Auth) Register(ctx context.Context, user domain.User) error {
+func (auth *Auth) Register(ctx context.Context, user domain.User) error {
 	log.Printf("Registering user: %s\n", user.Username)
-	return a.repo.Add(ctx, user)
+	return auth.repo.Add(ctx, user)
 }
 
-func (a *Auth) LoginStart(ctx context.Context, username string) (domain.LoginPayload, error) {
+func (auth *Auth) LoginStart(ctx context.Context, username, deviceId string) (crypto.LoginPayload, error) {
 	log.Printf("Starting login for user: %s\n", username)
-	return domain.LoginPayload{
-		DeviceId:         "device-id",
-		KDFParameters:    crypto.DefaultKDFParameters(),
-		EncryptedDataKey: []byte("encrypted-data-key"),
-		AuthKeyAlgorithm: crypto.DefaultAuthKeyAlgorithm(),
-		Challenge:        []byte("challenge"),
+	resp, err := auth.repo.Get(ctx, username)
+	if err != nil {
+		return crypto.LoginPayload{}, err
+	}
+
+	return crypto.LoginPayload{
+		DeviceId:         deviceId,
+		KDFParameters:    resp.KDFParameters,
+		EncryptedDataKey: resp.EncryptedDataKey,
+		AuthKeyAlgorithm: resp.AuthKeyAlgorithm,
+		Challenge:        crypto.RandBytes(8),
 	}, nil
 }

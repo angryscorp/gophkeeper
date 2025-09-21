@@ -28,7 +28,7 @@ func (s *Server) Register(ctx context.Context, req *auth.RegisterRequest) (*auth
 }
 
 func (s *Server) LoginStart(ctx context.Context, req *auth.LoginStartRequest) (*auth.LoginStartResponse, error) {
-	resp, err := s.usecase.LoginStart(ctx, req.Username)
+	resp, err := s.usecase.LoginStart(ctx, req.Username, req.DeviceName)
 	if err != nil {
 		return nil, err
 	}

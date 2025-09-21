@@ -8,11 +8,12 @@ import (
 )
 
 type Model struct {
-	login    func(username string) error
+	login    func(username, password string) error
 	state    state
 	input    textinput.Model
 	err      error
 	username string
+	password string
 }
 
 type state int
@@ -20,12 +21,13 @@ type state int
 const (
 	stateInit state = iota
 	stateAskUsername
+	stateAskPassword
 	stateInProgress
 	stateSuccess
 	stateError
 )
 
-func New(login func(username string) error) Model {
+func New(login func(username, password string) error) Model {
 	return Model{
 		login: login,
 		state: stateInit,
@@ -49,12 +51,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.state = stateError
 					return m, nil
 				}
+				m.state = stateAskPassword
+				return m, cmdAskPassword.Run
+			}
+
+			if m.state == stateAskPassword {
+				m.password = m.input.Value()
+				if m.password == "" {
+					m.err = fmt.Errorf("password cannot be empty")
+					m.state = stateError
+					return m, nil
+				}
 				m.state = stateInProgress
 				return m, cmdSendRequest.Run
 			}
 
 		default:
-			if m.state == stateAskUsername {
+			if m.state == stateAskUsername || m.state == stateAskPassword {
 				var cmd tea.Cmd
 				m.input, cmd = m.input.Update(msg)
 				return m, cmd
@@ -70,9 +83,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.state = stateAskUsername
 			return m, m.input.Focus()
 
+		case cmdAskPassword:
+			m.input.Prompt = "Enter password: "
+			m.input.EchoMode = textinput.EchoPassword
+			m.input.SetValue("")
+			m.state = stateAskPassword
+			return m, m.input.Focus()
+
 		case cmdSendRequest:
 			m.state = stateInProgress
-			return m, m.doLogin(m.username)
+			return m, m.doLogin(m.username, m.password)
 		}
 
 	case resultMsg:
@@ -91,7 +111,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) View() string {
 	title := "LOGIN"
 	switch m.state {
-	case stateAskUsername:
+	case stateAskUsername, stateAskPassword:
 		return fmt.Sprintf("%s\n\n%s", title, m.input.View())
 	case stateInProgress:
 		return fmt.Sprintf("%s\n\nsending request...", title)
@@ -104,9 +124,9 @@ func (m Model) View() string {
 	}
 }
 
-func (m Model) doLogin(username string) tea.Cmd {
+func (m Model) doLogin(username, password string) tea.Cmd {
 	return func() tea.Msg {
-		err := m.login(username)
+		err := m.login(username, password)
 		return resultMsg{
 			success: err == nil,
 			err:     err,
