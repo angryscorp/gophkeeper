@@ -7,21 +7,28 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const get = `-- name: Get :many
 SELECT id, username FROM users
 `
 
-func (q *Queries) Get(ctx context.Context) ([]User, error) {
+type GetRow struct {
+	ID       uuid.UUID
+	Username string
+}
+
+func (q *Queries) Get(ctx context.Context) ([]GetRow, error) {
 	rows, err := q.db.Query(ctx, get)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []GetRow
 	for rows.Next() {
-		var i User
+		var i GetRow
 		if err := rows.Scan(&i.ID, &i.Username); err != nil {
 			return nil, err
 		}

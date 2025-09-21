@@ -12,15 +12,44 @@ import (
 )
 
 const add = `-- name: Add :exec
-INSERT INTO users (id, username) VALUES ($1, $2)
+INSERT INTO users (
+    id, username,
+    kdf_algorithm, kdf_time_cost, kdf_memory_cost, kdf_parallelism, kdf_salt,
+    encrypted_data_key,
+    auth_key, auth_key_algorithm
+) VALUES (
+             $1, $2,
+             $3, $4, $5, $6, $7,
+             $8,
+             $9, $10
+         )
 `
 
 type AddParams struct {
-	ID       uuid.UUID
-	Username string
+	ID               uuid.UUID
+	Username         string
+	KdfAlgorithm     string
+	KdfTimeCost      int32
+	KdfMemoryCost    int32
+	KdfParallelism   int32
+	KdfSalt          []byte
+	EncryptedDataKey []byte
+	AuthKey          []byte
+	AuthKeyAlgorithm string
 }
 
 func (q *Queries) Add(ctx context.Context, arg AddParams) error {
-	_, err := q.db.Exec(ctx, add, arg.ID, arg.Username)
+	_, err := q.db.Exec(ctx, add,
+		arg.ID,
+		arg.Username,
+		arg.KdfAlgorithm,
+		arg.KdfTimeCost,
+		arg.KdfMemoryCost,
+		arg.KdfParallelism,
+		arg.KdfSalt,
+		arg.EncryptedDataKey,
+		arg.AuthKey,
+		arg.AuthKeyAlgorithm,
+	)
 	return err
 }

@@ -20,7 +20,7 @@ func New(usecase *usecaseAuth.Auth) *Server {
 var _ auth.AuthServiceServer = (*Server)(nil)
 
 func (s *Server) Register(ctx context.Context, req *auth.RegisterRequest) (*auth.RegisterResponse, error) {
-	err := s.usecase.Register(ctx, req.Username)
+	err := s.usecase.Register(ctx, requestToDomain(req))
 	if err != nil {
 		return nil, err
 	}

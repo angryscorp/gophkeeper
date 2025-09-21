@@ -31,20 +31,28 @@ func New(dsn string) (*Users, func(), error) {
 
 var _ users.Users = (*Users)(nil)
 
-func (u Users) Get(ctx context.Context) ([]domain.User, error) {
-	usernames, err := u.queries.Get(ctx)
+func (repo Users) Get(ctx context.Context) ([]domain.User, error) {
+	usernames, err := repo.queries.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return lo.Map(usernames, func(item db.User, index int) domain.User {
+	return lo.Map(usernames, func(item db.GetRow, index int) domain.User {
 		return domain.User{ID: item.ID, Username: item.Username}
 	}), nil
 }
 
-func (u Users) Add(ctx context.Context, user domain.User) error {
-	return u.queries.Add(ctx, db.AddParams{
-		ID:       user.ID,
-		Username: user.Username,
+func (repo Users) Add(ctx context.Context, user domain.User) error {
+	return repo.queries.Add(ctx, db.AddParams{
+		ID:               user.ID,
+		Username:         user.Username,
+		KdfAlgorithm:     string(user.KDFParameters.Algorithm),
+		KdfTimeCost:      int32(user.KDFParameters.TimeCost),
+		KdfMemoryCost:    int32(user.KDFParameters.MemoryCost),
+		KdfParallelism:   int32(user.KDFParameters.Parallelism),
+		KdfSalt:          user.KDFParameters.Salt,
+		EncryptedDataKey: user.EncryptedDataKey,
+		AuthKey:          user.AuthKey,
+		AuthKeyAlgorithm: string(user.AuthKeyAlgorithm),
 	})
 }
