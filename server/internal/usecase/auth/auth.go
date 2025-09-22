@@ -6,28 +6,41 @@ import (
 	"errors"
 	"gophkeeper/pkg/crypto"
 	"gophkeeper/server/internal/domain"
+	"gophkeeper/server/internal/repository/challenges"
 	"gophkeeper/server/internal/repository/users"
 	"log"
+	"time"
 )
 
 type Auth struct {
-	repo users.Users
+	users      users.Users
+	challenges challenges.Challenges
 }
 
-func New(repo users.Users) *Auth {
+func New(
+	users users.Users,
+	challenges challenges.Challenges,
+) *Auth {
 	return &Auth{
-		repo: repo,
+		users:      users,
+		challenges: challenges,
 	}
 }
 
 func (auth *Auth) Register(ctx context.Context, user domain.User) error {
 	log.Printf("Registering user: %s\n", user.Username)
-	return auth.repo.Add(ctx, user)
+	return auth.users.Add(ctx, user)
 }
 
 func (auth *Auth) LoginStart(ctx context.Context, username, deviceId string) (crypto.LoginPayload, error) {
 	log.Printf("Starting login for user: %s\n", username)
-	resp, err := auth.repo.Get(ctx, username)
+	resp, err := auth.users.Get(ctx, username)
+	if err != nil {
+		return crypto.LoginPayload{}, err
+	}
+
+	ch := crypto.RandBytes(8)
+	err = auth.challenges.Add(ctx, resp.ID, deviceId, ch, time.Now().Add(time.Minute))
 	if err != nil {
 		return crypto.LoginPayload{}, err
 	}
@@ -37,13 +50,13 @@ func (auth *Auth) LoginStart(ctx context.Context, username, deviceId string) (cr
 		KDFParameters:    resp.KDFParameters,
 		EncryptedDataKey: resp.EncryptedDataKey,
 		AuthKeyAlgorithm: resp.AuthKeyAlgorithm,
-		Challenge:        []byte("12345"),
+		Challenge:        ch,
 	}, nil
 }
 
 func (auth *Auth) LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) error {
 	log.Printf("Finishing login: %s\n", deviceName)
-	resp, err := auth.repo.Get(ctx, username)
+	resp, err := auth.users.Get(ctx, username)
 	if err != nil {
 		return err
 	}
