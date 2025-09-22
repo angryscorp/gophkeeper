@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+const challengeVerificationAttempts = 3
+
 type Auth struct {
 	users      users.Users
 	challenges challenges.Challenges
@@ -56,13 +58,26 @@ func (auth *Auth) LoginStart(ctx context.Context, username, deviceId string) (cr
 
 func (auth *Auth) LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) error {
 	log.Printf("Finishing login: %s\n", deviceName)
-	resp, err := auth.users.Get(ctx, username)
+
+	challengeIsCorrect := false
+	err := auth.challenges.GetForUpdate(ctx, username, deviceName, func(info challenges.ChallengeInfo) bool {
+		if info.Attempts >= challengeVerificationAttempts {
+			return false
+		}
+		expected := crypto.SignChallenge(info.AuthKey, info.Challenge, info.AuthKeyAlgorithm)
+		challengeIsCorrect = hmac.Equal(expected, challenge)
+		return challengeIsCorrect
+	})
 	if err != nil {
 		return err
 	}
-	expected := crypto.SignChallenge(resp.AuthKey, []byte("12345"), resp.AuthKeyAlgorithm)
-	if !hmac.Equal(expected, challenge) {
+
+	if !challengeIsCorrect {
 		return errors.New("invalid challenge")
 	}
+
+	// generate access token
+	// generate refresh token
+
 	return nil
 }
