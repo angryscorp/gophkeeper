@@ -4,6 +4,7 @@ import (
 	"context"
 	"gophkeeper/pkg/crypto"
 	"gophkeeper/pkg/grpc/auth"
+	"gophkeeper/pkg/grpc/mapper"
 
 	"google.golang.org/grpc"
 )
@@ -19,10 +20,10 @@ func New(conn *grpc.ClientConn) *Client {
 func (c Client) Register(ctx context.Context, username string, kdf crypto.KDFParameters, edKey, authKey []byte, algorithm crypto.AuthKeyAlgorithm) error {
 	req := &auth.RegisterRequest{
 		Username:         username,
-		Kdf:              mapKDFToGRPC(kdf),
+		Kdf:              mapper.KdfParametersToGRPC(kdf),
 		EncryptedDataKey: edKey,
 		AuthKey:          authKey,
-		AuthKeyAlg:       mapAuthAlgoToRPC(algorithm),
+		AuthKeyAlg:       mapper.AuthAlgoToGRPC(algorithm),
 	}
 
 	_, err := c.client.Register(ctx, req)
@@ -40,9 +41,9 @@ func (c Client) LoginStart(ctx context.Context, username string, deviceName stri
 	}
 	return crypto.LoginPayload{
 		DeviceId:         resp.DeviceId,
-		KDFParameters:    mapKDFToDomain(resp.Kdf),
+		KDFParameters:    mapper.KdfParametersToDomain(resp.Kdf),
 		EncryptedDataKey: resp.EncryptedDataKey,
-		AuthKeyAlgorithm: mapAuthAlgoToDomain(resp.AuthKeyAlg),
+		AuthKeyAlgorithm: mapper.AuthAlgoToDomain(resp.AuthKeyAlg),
 		Challenge:        resp.Challenge,
 	}, nil
 }

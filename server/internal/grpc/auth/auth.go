@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"gophkeeper/pkg/grpc/mapper"
 	"time"
 
 	"gophkeeper/pkg/grpc/auth"
@@ -34,9 +35,9 @@ func (s *Server) LoginStart(ctx context.Context, req *auth.LoginStartRequest) (*
 	}
 	return &auth.LoginStartResponse{
 		DeviceId:         resp.DeviceId,
-		Kdf:              kdfParametersToGRPC(resp.KDFParameters),
+		Kdf:              mapper.KdfParametersToGRPC(resp.KDFParameters),
 		EncryptedDataKey: resp.EncryptedDataKey,
-		AuthKeyAlg:       authAlgoToGRPC(resp.AuthKeyAlgorithm),
+		AuthKeyAlg:       mapper.AuthAlgoToGRPC(resp.AuthKeyAlgorithm),
 		Challenge:        resp.Challenge,
 	}, nil
 }
