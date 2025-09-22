@@ -41,9 +41,9 @@ func (auth *Auth) LoginStart(ctx context.Context, username, deviceId string) (cr
 	}, nil
 }
 
-func (auth *Auth) LoginFinish(ctx context.Context, deviceName string, challenge []byte) error {
+func (auth *Auth) LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) error {
 	log.Printf("Finishing login: %s\n", deviceName)
-	resp, err := auth.repo.Get(ctx, "test_user")
+	resp, err := auth.repo.Get(ctx, username)
 	if err != nil {
 		return err
 	}

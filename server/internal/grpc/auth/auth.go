@@ -43,7 +43,7 @@ func (s *Server) LoginStart(ctx context.Context, req *auth.LoginStartRequest) (*
 }
 
 func (s *Server) LoginFinish(ctx context.Context, req *auth.LoginFinishRequest) (*auth.LoginFinishResponse, error) {
-	err := s.usecase.LoginFinish(ctx, req.DeviceId, req.Response)
+	err := s.usecase.LoginFinish(ctx, req.Username, req.DeviceId, req.Response)
 	if err != nil {
 		return nil, err
 	}
@@ -60,8 +60,4 @@ func (s *Server) RefreshToken(ctx context.Context, req *auth.RefreshRequest) (*a
 		AccessToken:   "access-token",
 		ExpiresAtUnix: time.Now().Add(15 * time.Minute).Unix(),
 	}, nil
-}
-
-func (s *Server) ChangePassword(ctx context.Context, req *auth.ChangePasswordRequest) (*auth.ChangePasswordResponse, error) {
-	return &auth.ChangePasswordResponse{}, nil
 }

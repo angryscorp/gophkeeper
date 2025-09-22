@@ -434,8 +434,9 @@ func (x *LoginStartResponse) GetChallenge() []byte {
 
 type LoginFinishRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DeviceId      string                 `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	Response      []byte                 `protobuf:"bytes,2,opt,name=response,proto3" json:"response,omitempty"` // HMAC(DataKey, challenge)
+	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,2,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	Response      []byte                 `protobuf:"bytes,3,opt,name=response,proto3" json:"response,omitempty"` // HMAC(DataKey, challenge)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -468,6 +469,13 @@ func (x *LoginFinishRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use LoginFinishRequest.ProtoReflect.Descriptor instead.
 func (*LoginFinishRequest) Descriptor() ([]byte, []int) {
 	return file_auth_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *LoginFinishRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
 }
 
 func (x *LoginFinishRequest) GetDeviceId() string {
@@ -648,94 +656,6 @@ func (x *RefreshResponse) GetExpiresAtUnix() int64 {
 	return 0
 }
 
-type ChangePasswordRequest struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	NewKdf              *KdfParams             `protobuf:"bytes,1,opt,name=new_kdf,json=newKdf,proto3" json:"new_kdf,omitempty"`
-	NewEncryptedDataKey []byte                 `protobuf:"bytes,2,opt,name=new_encrypted_data_key,json=newEncryptedDataKey,proto3" json:"new_encrypted_data_key,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
-}
-
-func (x *ChangePasswordRequest) Reset() {
-	*x = ChangePasswordRequest{}
-	mi := &file_auth_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ChangePasswordRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ChangePasswordRequest) ProtoMessage() {}
-
-func (x *ChangePasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ChangePasswordRequest.ProtoReflect.Descriptor instead.
-func (*ChangePasswordRequest) Descriptor() ([]byte, []int) {
-	return file_auth_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *ChangePasswordRequest) GetNewKdf() *KdfParams {
-	if x != nil {
-		return x.NewKdf
-	}
-	return nil
-}
-
-func (x *ChangePasswordRequest) GetNewEncryptedDataKey() []byte {
-	if x != nil {
-		return x.NewEncryptedDataKey
-	}
-	return nil
-}
-
-type ChangePasswordResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ChangePasswordResponse) Reset() {
-	*x = ChangePasswordResponse{}
-	mi := &file_auth_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ChangePasswordResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ChangePasswordResponse) ProtoMessage() {}
-
-func (x *ChangePasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ChangePasswordResponse.ProtoReflect.Descriptor instead.
-func (*ChangePasswordResponse) Descriptor() ([]byte, []int) {
-	return file_auth_proto_rawDescGZIP(), []int{10}
-}
-
 var File_auth_proto protoreflect.FileDescriptor
 
 const file_auth_proto_rawDesc = "" +
@@ -767,10 +687,11 @@ const file_auth_proto_rawDesc = "" +
 	"\x12encrypted_data_key\x18\x03 \x01(\fR\x10encryptedDataKey\x12;\n" +
 	"\fauth_key_alg\x18\x04 \x01(\x0e2\x19.gophkeeper.v1.AuthKeyAlgR\n" +
 	"authKeyAlg\x12\x1c\n" +
-	"\tchallenge\x18\x05 \x01(\fR\tchallenge\"M\n" +
-	"\x12LoginFinishRequest\x12\x1b\n" +
-	"\tdevice_id\x18\x01 \x01(\tR\bdeviceId\x12\x1a\n" +
-	"\bresponse\x18\x02 \x01(\fR\bresponse\"\x85\x01\n" +
+	"\tchallenge\x18\x05 \x01(\fR\tchallenge\"i\n" +
+	"\x12LoginFinishRequest\x12\x1a\n" +
+	"\busername\x18\x01 \x01(\tR\busername\x12\x1b\n" +
+	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\x12\x1a\n" +
+	"\bresponse\x18\x03 \x01(\fR\bresponse\"\x85\x01\n" +
 	"\x13LoginFinishResponse\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12&\n" +
@@ -780,11 +701,7 @@ const file_auth_proto_rawDesc = "" +
 	"\x0fRefreshResponse\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12&\n" +
-	"\x0fexpires_at_unix\x18\x03 \x01(\x03R\rexpiresAtUnix\"\x7f\n" +
-	"\x15ChangePasswordRequest\x121\n" +
-	"\anew_kdf\x18\x01 \x01(\v2\x18.gophkeeper.v1.KdfParamsR\x06newKdf\x123\n" +
-	"\x16new_encrypted_data_key\x18\x02 \x01(\fR\x13newEncryptedDataKey\"\x18\n" +
-	"\x16ChangePasswordResponse*/\n" +
+	"\x0fexpires_at_unix\x18\x03 \x01(\x03R\rexpiresAtUnix*/\n" +
 	"\x06KdfAlg\x12\x17\n" +
 	"\x13KDF_ALG_UNSPECIFIED\x10\x00\x12\f\n" +
 	"\bARGON2ID\x10\x01*L\n" +
@@ -792,14 +709,13 @@ const file_auth_proto_rawDesc = "" +
 	"AuthKeyAlg\x12\x1c\n" +
 	"\x18AUTH_KEY_ALG_UNSPECIFIED\x10\x00\x12\x0f\n" +
 	"\vHMAC_SHA256\x10\x01\x12\x0f\n" +
-	"\vHMAC_SHA512\x10\x022\xb1\x03\n" +
+	"\vHMAC_SHA512\x10\x022\xd2\x02\n" +
 	"\vAuthService\x12K\n" +
 	"\bRegister\x12\x1e.gophkeeper.v1.RegisterRequest\x1a\x1f.gophkeeper.v1.RegisterResponse\x12Q\n" +
 	"\n" +
 	"LoginStart\x12 .gophkeeper.v1.LoginStartRequest\x1a!.gophkeeper.v1.LoginStartResponse\x12T\n" +
 	"\vLoginFinish\x12!.gophkeeper.v1.LoginFinishRequest\x1a\".gophkeeper.v1.LoginFinishResponse\x12M\n" +
-	"\fRefreshToken\x12\x1d.gophkeeper.v1.RefreshRequest\x1a\x1e.gophkeeper.v1.RefreshResponse\x12]\n" +
-	"\x0eChangePassword\x12$.gophkeeper.v1.ChangePasswordRequest\x1a%.gophkeeper.v1.ChangePasswordResponseB\x1aZ\x18gophkeeper/pkg/grpc/authb\x06proto3"
+	"\fRefreshToken\x12\x1d.gophkeeper.v1.RefreshRequest\x1a\x1e.gophkeeper.v1.RefreshResponseB\x1aZ\x18gophkeeper/pkg/grpc/authb\x06proto3"
 
 var (
 	file_auth_proto_rawDescOnce sync.Once
@@ -814,21 +730,19 @@ func file_auth_proto_rawDescGZIP() []byte {
 }
 
 var file_auth_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_auth_proto_goTypes = []any{
-	(KdfAlg)(0),                    // 0: gophkeeper.v1.KdfAlg
-	(AuthKeyAlg)(0),                // 1: gophkeeper.v1.AuthKeyAlg
-	(*KdfParams)(nil),              // 2: gophkeeper.v1.KdfParams
-	(*RegisterRequest)(nil),        // 3: gophkeeper.v1.RegisterRequest
-	(*RegisterResponse)(nil),       // 4: gophkeeper.v1.RegisterResponse
-	(*LoginStartRequest)(nil),      // 5: gophkeeper.v1.LoginStartRequest
-	(*LoginStartResponse)(nil),     // 6: gophkeeper.v1.LoginStartResponse
-	(*LoginFinishRequest)(nil),     // 7: gophkeeper.v1.LoginFinishRequest
-	(*LoginFinishResponse)(nil),    // 8: gophkeeper.v1.LoginFinishResponse
-	(*RefreshRequest)(nil),         // 9: gophkeeper.v1.RefreshRequest
-	(*RefreshResponse)(nil),        // 10: gophkeeper.v1.RefreshResponse
-	(*ChangePasswordRequest)(nil),  // 11: gophkeeper.v1.ChangePasswordRequest
-	(*ChangePasswordResponse)(nil), // 12: gophkeeper.v1.ChangePasswordResponse
+	(KdfAlg)(0),                 // 0: gophkeeper.v1.KdfAlg
+	(AuthKeyAlg)(0),             // 1: gophkeeper.v1.AuthKeyAlg
+	(*KdfParams)(nil),           // 2: gophkeeper.v1.KdfParams
+	(*RegisterRequest)(nil),     // 3: gophkeeper.v1.RegisterRequest
+	(*RegisterResponse)(nil),    // 4: gophkeeper.v1.RegisterResponse
+	(*LoginStartRequest)(nil),   // 5: gophkeeper.v1.LoginStartRequest
+	(*LoginStartResponse)(nil),  // 6: gophkeeper.v1.LoginStartResponse
+	(*LoginFinishRequest)(nil),  // 7: gophkeeper.v1.LoginFinishRequest
+	(*LoginFinishResponse)(nil), // 8: gophkeeper.v1.LoginFinishResponse
+	(*RefreshRequest)(nil),      // 9: gophkeeper.v1.RefreshRequest
+	(*RefreshResponse)(nil),     // 10: gophkeeper.v1.RefreshResponse
 }
 var file_auth_proto_depIdxs = []int32{
 	0,  // 0: gophkeeper.v1.KdfParams.alg:type_name -> gophkeeper.v1.KdfAlg
@@ -836,22 +750,19 @@ var file_auth_proto_depIdxs = []int32{
 	1,  // 2: gophkeeper.v1.RegisterRequest.auth_key_alg:type_name -> gophkeeper.v1.AuthKeyAlg
 	2,  // 3: gophkeeper.v1.LoginStartResponse.kdf:type_name -> gophkeeper.v1.KdfParams
 	1,  // 4: gophkeeper.v1.LoginStartResponse.auth_key_alg:type_name -> gophkeeper.v1.AuthKeyAlg
-	2,  // 5: gophkeeper.v1.ChangePasswordRequest.new_kdf:type_name -> gophkeeper.v1.KdfParams
-	3,  // 6: gophkeeper.v1.AuthService.Register:input_type -> gophkeeper.v1.RegisterRequest
-	5,  // 7: gophkeeper.v1.AuthService.LoginStart:input_type -> gophkeeper.v1.LoginStartRequest
-	7,  // 8: gophkeeper.v1.AuthService.LoginFinish:input_type -> gophkeeper.v1.LoginFinishRequest
-	9,  // 9: gophkeeper.v1.AuthService.RefreshToken:input_type -> gophkeeper.v1.RefreshRequest
-	11, // 10: gophkeeper.v1.AuthService.ChangePassword:input_type -> gophkeeper.v1.ChangePasswordRequest
-	4,  // 11: gophkeeper.v1.AuthService.Register:output_type -> gophkeeper.v1.RegisterResponse
-	6,  // 12: gophkeeper.v1.AuthService.LoginStart:output_type -> gophkeeper.v1.LoginStartResponse
-	8,  // 13: gophkeeper.v1.AuthService.LoginFinish:output_type -> gophkeeper.v1.LoginFinishResponse
-	10, // 14: gophkeeper.v1.AuthService.RefreshToken:output_type -> gophkeeper.v1.RefreshResponse
-	12, // 15: gophkeeper.v1.AuthService.ChangePassword:output_type -> gophkeeper.v1.ChangePasswordResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	3,  // 5: gophkeeper.v1.AuthService.Register:input_type -> gophkeeper.v1.RegisterRequest
+	5,  // 6: gophkeeper.v1.AuthService.LoginStart:input_type -> gophkeeper.v1.LoginStartRequest
+	7,  // 7: gophkeeper.v1.AuthService.LoginFinish:input_type -> gophkeeper.v1.LoginFinishRequest
+	9,  // 8: gophkeeper.v1.AuthService.RefreshToken:input_type -> gophkeeper.v1.RefreshRequest
+	4,  // 9: gophkeeper.v1.AuthService.Register:output_type -> gophkeeper.v1.RegisterResponse
+	6,  // 10: gophkeeper.v1.AuthService.LoginStart:output_type -> gophkeeper.v1.LoginStartResponse
+	8,  // 11: gophkeeper.v1.AuthService.LoginFinish:output_type -> gophkeeper.v1.LoginFinishResponse
+	10, // 12: gophkeeper.v1.AuthService.RefreshToken:output_type -> gophkeeper.v1.RefreshResponse
+	9,  // [9:13] is the sub-list for method output_type
+	5,  // [5:9] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_auth_proto_init() }
@@ -865,7 +776,7 @@ func file_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_proto_rawDesc), len(file_auth_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   11,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

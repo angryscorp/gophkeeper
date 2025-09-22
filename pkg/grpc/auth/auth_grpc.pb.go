@@ -19,11 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_Register_FullMethodName       = "/gophkeeper.v1.AuthService/Register"
-	AuthService_LoginStart_FullMethodName     = "/gophkeeper.v1.AuthService/LoginStart"
-	AuthService_LoginFinish_FullMethodName    = "/gophkeeper.v1.AuthService/LoginFinish"
-	AuthService_RefreshToken_FullMethodName   = "/gophkeeper.v1.AuthService/RefreshToken"
-	AuthService_ChangePassword_FullMethodName = "/gophkeeper.v1.AuthService/ChangePassword"
+	AuthService_Register_FullMethodName     = "/gophkeeper.v1.AuthService/Register"
+	AuthService_LoginStart_FullMethodName   = "/gophkeeper.v1.AuthService/LoginStart"
+	AuthService_LoginFinish_FullMethodName  = "/gophkeeper.v1.AuthService/LoginFinish"
+	AuthService_RefreshToken_FullMethodName = "/gophkeeper.v1.AuthService/RefreshToken"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -34,8 +33,6 @@ type AuthServiceClient interface {
 	LoginStart(ctx context.Context, in *LoginStartRequest, opts ...grpc.CallOption) (*LoginStartResponse, error)
 	LoginFinish(ctx context.Context, in *LoginFinishRequest, opts ...grpc.CallOption) (*LoginFinishResponse, error)
 	RefreshToken(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*RefreshResponse, error)
-	// Requires Authorization: Bearer <access_token>
-	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error)
 }
 
 type authServiceClient struct {
@@ -86,16 +83,6 @@ func (c *authServiceClient) RefreshToken(ctx context.Context, in *RefreshRequest
 	return out, nil
 }
 
-func (c *authServiceClient) ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ChangePasswordResponse)
-	err := c.cc.Invoke(ctx, AuthService_ChangePassword_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -104,8 +91,6 @@ type AuthServiceServer interface {
 	LoginStart(context.Context, *LoginStartRequest) (*LoginStartResponse, error)
 	LoginFinish(context.Context, *LoginFinishRequest) (*LoginFinishResponse, error)
 	RefreshToken(context.Context, *RefreshRequest) (*RefreshResponse, error)
-	// Requires Authorization: Bearer <access_token>
-	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -127,9 +112,6 @@ func (UnimplementedAuthServiceServer) LoginFinish(context.Context, *LoginFinishR
 }
 func (UnimplementedAuthServiceServer) RefreshToken(context.Context, *RefreshRequest) (*RefreshResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
-}
-func (UnimplementedAuthServiceServer) ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ChangePassword not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -224,24 +206,6 @@ func _AuthService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_ChangePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ChangePasswordRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServiceServer).ChangePassword(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AuthService_ChangePassword_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).ChangePassword(ctx, req.(*ChangePasswordRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -264,10 +228,6 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RefreshToken",
 			Handler:    _AuthService_RefreshToken_Handler,
-		},
-		{
-			MethodName: "ChangePassword",
-			Handler:    _AuthService_ChangePassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
