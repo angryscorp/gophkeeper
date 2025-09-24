@@ -59,3 +59,9 @@ build:
 	GOOS=darwin GOARCH=arm64 go build -o $(CLIENT_BIN)/$(CLIENT_NAME)-darwin-arm64 $(CLIENT_SRC)/*.go
 
 	@echo "Build completed. Binaries are in $(CLIENT_BIN)/"
+
+.PHONY: gen-keys
+gen-keys:
+	@openssl genpkey -algorithm Ed25519 -out server/keys/ed25519.key
+	@openssl pkey -in server/keys/ed25519.key -pubout -out server/keys/ed25519.pub
+	@echo "Keys generated"

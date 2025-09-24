@@ -36,5 +36,9 @@ go.work.sum
 *.db-shm
 *.db-wal
 
+# Keys
+ed25519.key
+ed25519.pub
+
 # Other
 *.DS_Store

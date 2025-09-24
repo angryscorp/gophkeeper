@@ -1,9 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"gophkeeper/server/internal/config"
 	"gophkeeper/server/internal/repository/migration"
+	"gophkeeper/server/internal/tokens"
 	"log"
+	"time"
+)
+
+const (
+	audience       = "gophkeeper"
+	accessTokenTTL = 15 * time.Minute
 )
 
 func main() {
@@ -12,6 +20,24 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// PEM keys
+	publicKey, err := tokens.LoadPublicKey(cfg.PublicKeyPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	privateKey, err := tokens.LoadPrivateKey(cfg.PrivateKeyPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Tokens
+	signer := tokens.NewSigner(privateKey, audience, accessTokenTTL)
+	verifier := tokens.NewVerifier(publicKey, audience)
+
+	// Debug
+	fmt.Printf("\nSigner: %+v\n\nVerifier: %+v\n\n", signer, verifier)
 
 	// Database migrations
 	if err := migration.MigratePostgres(cfg.DatabaseDSN); err != nil {
