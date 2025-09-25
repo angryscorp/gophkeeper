@@ -17,7 +17,7 @@ const (
 type Client interface {
 	Register(ctx context.Context, username string, kdf crypto.KDFParameters, edKey, authKey []byte, algorithm crypto.AuthKeyAlgorithm) error
 	LoginStart(ctx context.Context, username string, deviceName string) (crypto.LoginPayload, error)
-	LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) error
+	LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) (string, error)
 }
 
 type Auth struct {
@@ -106,5 +106,16 @@ func (auth *Auth) Login(username, password string) error {
 	challengeResponse := crypto.SignChallenge(authKey, resp.Challenge, resp.AuthKeyAlgorithm)
 
 	// Finish login
-	return auth.client.LoginFinish(ctx, username, deviceName, challengeResponse)
+	token, err := auth.client.LoginFinish(ctx, username, deviceName, challengeResponse)
+	if err != nil {
+		return err
+	}
+
+	// Save an access token
+	err = auth.repo.SaveAccessToken(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

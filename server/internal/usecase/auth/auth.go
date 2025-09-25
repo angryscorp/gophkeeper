@@ -14,18 +14,24 @@ import (
 
 const challengeVerificationAttempts = 3
 
+type TokenIssuer interface {
+	IssueAccess(userID, deviceID string) (string, error)
+}
 type Auth struct {
-	users      users.Users
-	challenges challenges.Challenges
+	users       users.Users
+	challenges  challenges.Challenges
+	tokenIssuer TokenIssuer
 }
 
 func New(
 	users users.Users,
 	challenges challenges.Challenges,
+	tokenIssuer TokenIssuer,
 ) *Auth {
 	return &Auth{
-		users:      users,
-		challenges: challenges,
+		users:       users,
+		challenges:  challenges,
+		tokenIssuer: tokenIssuer,
 	}
 }
 
@@ -56,7 +62,7 @@ func (auth *Auth) LoginStart(ctx context.Context, username, deviceId string) (cr
 	}, nil
 }
 
-func (auth *Auth) LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) error {
+func (auth *Auth) LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) (string, error) {
 	log.Printf("Finishing login: %s\n", deviceName)
 
 	challengeIsCorrect := false
@@ -69,15 +75,17 @@ func (auth *Auth) LoginFinish(ctx context.Context, username, deviceName string, 
 		return challengeIsCorrect
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if !challengeIsCorrect {
-		return errors.New("invalid challenge")
+		return "", errors.New("invalid challenge")
 	}
 
-	// generate access token
-	// generate refresh token
+	token, err := auth.tokenIssuer.IssueAccess(username, deviceName)
+	if err != nil {
+		return "", err
+	}
 
-	return nil
+	return token, nil
 }

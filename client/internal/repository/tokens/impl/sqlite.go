@@ -51,3 +51,7 @@ func (t Tokens) GetAccessToken(ctx context.Context) (string, error) {
 
 	return dbTokens[0], nil
 }
+
+func (t Tokens) SaveAccessToken(ctx context.Context, token string) error {
+	return t.queries.SaveAccessToken(ctx, token)
+}

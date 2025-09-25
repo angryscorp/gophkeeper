@@ -2,10 +2,8 @@ package auth
 
 import (
 	"context"
-	"gophkeeper/pkg/grpc/mapper"
-	"time"
-
 	"gophkeeper/pkg/grpc/auth"
+	"gophkeeper/pkg/grpc/mapper"
 	usecaseAuth "gophkeeper/server/internal/usecase/auth"
 )
 
@@ -43,21 +41,9 @@ func (s *Server) LoginStart(ctx context.Context, req *auth.LoginStartRequest) (*
 }
 
 func (s *Server) LoginFinish(ctx context.Context, req *auth.LoginFinishRequest) (*auth.LoginFinishResponse, error) {
-	err := s.usecase.LoginFinish(ctx, req.Username, req.DeviceId, req.Response)
+	token, err := s.usecase.LoginFinish(ctx, req.Username, req.DeviceId, req.Response)
 	if err != nil {
 		return nil, err
 	}
-
-	return &auth.LoginFinishResponse{
-		AccessToken:   "access-token",
-		RefreshToken:  "refresh-token",
-		ExpiresAtUnix: time.Now().Add(15 * time.Minute).Unix(),
-	}, nil
-}
-
-func (s *Server) RefreshToken(ctx context.Context, req *auth.RefreshRequest) (*auth.RefreshResponse, error) {
-	return &auth.RefreshResponse{
-		AccessToken:   "access-token",
-		ExpiresAtUnix: time.Now().Add(15 * time.Minute).Unix(),
-	}, nil
+	return &auth.LoginFinishResponse{AccessToken: token}, nil
 }

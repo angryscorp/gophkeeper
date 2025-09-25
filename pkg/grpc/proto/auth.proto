@@ -27,7 +27,6 @@ service AuthService {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc LoginStart(LoginStartRequest) returns (LoginStartResponse);
   rpc LoginFinish(LoginFinishRequest) returns (LoginFinishResponse);
-  rpc RefreshToken(RefreshRequest) returns (RefreshResponse);
 }
 
 message RegisterRequest {
@@ -61,16 +60,4 @@ message LoginFinishRequest {
 
 message LoginFinishResponse {
   string access_token = 1;
-  string refresh_token = 2;
-  int64  expires_at_unix = 3;
-}
-
-message RefreshRequest {
-  string refresh_token = 1;
-}
-
-message RefreshResponse {
-  string access_token = 1;
-  string refresh_token = 2;
-  int64  expires_at_unix = 3;
 }
