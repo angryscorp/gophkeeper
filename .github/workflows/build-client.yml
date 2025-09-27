@@ -1,0 +1,89 @@
+name: Build Cross-Platform
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  build:
+    name: Build binaries
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            runner: ubuntu-latest
+            output: gophkeeper-linux-amd64
+            cc: gcc
+            cxx: g++
+          - goos: windows
+            goarch: amd64
+            runner: ubuntu-latest
+            output: gophkeeper-windows-amd64.exe
+            cc: x86_64-w64-mingw32-gcc
+            cxx: x86_64-w64-mingw32-g++
+          - goos: darwin
+            goarch: arm64
+            runner: macos-latest
+            output: gophkeeper-macos-arm64
+            cc: clang
+            cxx: clang++
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.25'
+
+      - name: Install dependencies (Ubuntu)
+        if: matrix.runner == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          # For Linux static linking
+          sudo apt-get install -y gcc libc6-dev
+          # For Windows
+          sudo apt-get install -y gcc-mingw-w64
+          # SQLite/SQLCipher
+          sudo apt-get install -y libsqlite3-dev libsqlcipher-dev
+
+      - name: Install dependencies (macOS)
+        if: matrix.runner == 'macos-latest'
+        run: |
+          brew install sqlcipher
+
+      - name: Clean and download Go modules
+        run: |
+          go clean -modcache
+          go mod download
+
+      - name: Build ${{ matrix.goos }} binary
+        env:
+          CGO_ENABLED: 1
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cxx }}
+        run: |
+          mkdir -p client/bin
+          if [ "${{ matrix.goos }}" = "linux" ]; then
+            # Static building for Linux
+            go build -tags sqlcipher \
+              -ldflags '-linkmode external -extldflags "-static"' \
+              -a -o client/bin/${{ matrix.output }} \
+              client/cmd/*.go
+          else
+            # Dynamic building for Windows and macOS
+            go build -tags sqlcipher \
+              -o client/bin/${{ matrix.output }} \
+              client/cmd/*.go
+          fi
+
+      - name: Upload ${{ matrix.goos }}-${{ matrix.goarch }} binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.output }}
+          path: client/bin/${{ matrix.output }}
