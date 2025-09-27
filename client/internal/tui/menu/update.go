@@ -1,12 +1,6 @@
 package menu
 
-import (
-	tea "github.com/charmbracelet/bubbletea"
-)
-
-func (m Model) Init() tea.Cmd {
-	return nil
-}
+import tea "github.com/charmbracelet/bubbletea"
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.route {
@@ -21,25 +15,33 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m Model) View() string {
-	switch m.route {
-	case routeMenu:
-		return m.view()
-	case routeRegister:
-		return m.reg.View()
-	case routeAuth:
-		return m.auth.View()
-	case routeSync:
-		return m.sync.View()
-	case routeData:
-		return m.data.View()
-	case routeNewItem:
-		return m.record.View()
-	case routeHelp:
-		return m.help.View()
-	default:
-		return ""
+func (m Model) update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
+
+		case "up":
+			if m.cursor > 1 {
+				m.cursor--
+			}
+
+		case "down":
+			if m.cursor < len(m.items) {
+				m.cursor++
+			}
+
+		case "enter":
+			m.route = m.items[m.cursor-1].route
+			cmd := m.items[m.cursor-1].init(&m)
+			if cmd != nil {
+				return m, cmd
+			}
+		}
 	}
+
+	return m, nil
 }
 
 func handleSubModelUpdate(m *Model, msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -67,6 +69,7 @@ func handleSubModelUpdate(m *Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	return m, cmd
 }
+
 func isExitKey(msg tea.Msg) bool {
 	switch msg.(type) {
 	case tea.KeyMsg:

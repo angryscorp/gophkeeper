@@ -1,7 +1,6 @@
 package menu
 
 import (
-	"fmt"
 	"gophkeeper/client/internal/tui/auth"
 	"gophkeeper/client/internal/tui/help"
 	"gophkeeper/client/internal/tui/list"
@@ -11,29 +10,18 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type route int
-
-const (
-	routeMenu route = iota
-	routeRegister
-	routeAuth
-	routeSync
-	routeData
-	routeNewItem
-	routeHelp
-	routeQuit
-)
-
 type menuItem struct {
-	title string
-	route route
-	init  func(*Model) tea.Cmd
+	title       string
+	description string
+	route       route
+	init        func(*Model) tea.Cmd
 }
 
 type Model struct {
 	route  route
 	items  []menuItem
 	cursor int
+
 	reg    auth.Model
 	auth   auth.Model
 	sync   sync.Model
@@ -51,55 +39,53 @@ func New(
 	return Model{
 		route: routeMenu,
 		items: []menuItem{
-			{"Register", routeRegister, func(m *Model) tea.Cmd { m.reg = auth.New("REGISTER", regFactory); return m.reg.Init() }},
-			{"Login", routeAuth, func(m *Model) tea.Cmd { m.auth = auth.New("LOGIN", loginFactory); return m.auth.Init() }},
-			{"Sync", routeSync, func(m *Model) tea.Cmd { m.sync = sync.New(syncFactory); return m.sync.Init() }},
-			{"Private Data", routeData, func(m *Model) tea.Cmd { m.data = list.New(nil); return tea.WindowSize() }},
-			{"Add New Item", routeNewItem, func(m *Model) tea.Cmd { m.record = record.New(); return m.record.Init() }},
-			{"Help", routeHelp, func(m *Model) tea.Cmd { m.help = help.New(helpFactory); return m.help.Init() }},
-			{"Quit", routeQuit, func(m *Model) tea.Cmd { return tea.Quit }},
+			{
+				"📕 Register",
+				"Register new account",
+				routeRegister,
+				func(m *Model) tea.Cmd { m.reg = auth.New("REGISTER", regFactory); return m.reg.Init() },
+			},
+			{
+				"🔑️ Login",
+				"Login to existing account",
+				routeAuth,
+				func(m *Model) tea.Cmd { m.auth = auth.New("LOGIN", loginFactory); return m.auth.Init() },
+			},
+			{
+				"📡 Sync",
+				"Sync data with server",
+				routeSync,
+				func(m *Model) tea.Cmd { m.sync = sync.New(syncFactory); return m.sync.Init() },
+			},
+			{
+				"📒 Private Data",
+				"See the vault's content",
+				routeData,
+				func(m *Model) tea.Cmd { m.data = list.New(nil); return tea.WindowSize() },
+			},
+			{
+				"💳 Add New Item",
+				"Add data to the vault",
+				routeNewItem,
+				func(m *Model) tea.Cmd { m.record = record.New(); return m.record.Init() },
+			},
+			{
+				"📚 Help",
+				"Help, controls, description",
+				routeHelp,
+				func(m *Model) tea.Cmd { m.help = help.New(helpFactory); return m.help.Init() },
+			},
+			{
+				"👋 Quit",
+				"Exit Gophkeeper",
+				routeQuit,
+				func(m *Model) tea.Cmd { return tea.Quit },
+			},
 		},
 		cursor: 1,
 	}
 }
 
-func (m Model) view() string {
-	str := "🔐 GophKeeper\n\n"
-	for i, it := range m.items {
-		cursor := " "
-		if m.cursor == (i + 1) {
-			cursor = "›"
-		}
-		str += fmt.Sprintf(" %s %s\n", cursor, it.title)
-	}
-	return str
-}
-
-func (m Model) update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-
-		case "up":
-			if m.cursor > 1 {
-				m.cursor--
-			}
-
-		case "down":
-			if m.cursor < len(m.items) {
-				m.cursor++
-			}
-
-		case "enter":
-			m.route = m.items[m.cursor-1].route
-			cmd := m.items[m.cursor-1].init(&m)
-			if cmd != nil {
-				return m, cmd
-			}
-		}
-	}
-
-	return m, nil
+func (m Model) Init() tea.Cmd {
+	return nil
 }
