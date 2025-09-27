@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package gophkeeper.v1;
 
+import "google/protobuf/empty.proto";
+
 option go_package = "gophkeeper/pkg/grpc/sync";
 
 message RecordChange {
@@ -19,6 +21,7 @@ message RecordChange {
 service SyncService {
   rpc Pull(PullRequest) returns (PullResponse);
   rpc Push(PushRequest) returns (PushResponse);
+  rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
 }
 
 message PullRequest {

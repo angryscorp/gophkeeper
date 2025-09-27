@@ -27,10 +27,7 @@ debug:
 
 .PHONY: proto
 proto:
-	protoc -I pkg/grpc/proto \
-	  --go_out=./.. \
-	  --go-grpc_out=./.. \
-	  pkg/grpc/proto/*.proto
+	protoc -I pkg/grpc/proto --go_out=./.. --go-grpc_out=./.. pkg/grpc/proto/*.proto
 
 .PHONY: gen-keys
 gen-keys:

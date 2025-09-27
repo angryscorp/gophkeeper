@@ -7,6 +7,7 @@ import (
 	"gophkeeper/client/internal/tui/menu"
 	"gophkeeper/client/internal/usecase/auth"
 	"log"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"google.golang.org/grpc"
@@ -41,6 +42,11 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	mainMenu := menu.New(
 		authUsecase.Register,
 		authUsecase.Login,
+		func() error {
+			// Debug TUI
+			time.Sleep(2 * time.Second)
+			return nil
+		},
 	)
 	program := tea.NewProgram(mainMenu, tea.WithAltScreen())
 

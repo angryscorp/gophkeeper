@@ -9,6 +9,7 @@ package sync
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -485,7 +486,7 @@ var File_sync_proto protoreflect.FileDescriptor
 const file_sync_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"sync.proto\x12\rgophkeeper.v1\"\xf7\x01\n" +
+	"sync.proto\x12\rgophkeeper.v1\x1a\x1bgoogle/protobuf/empty.proto\"\xf7\x01\n" +
 	"\fRecordChange\x12\x1b\n" +
 	"\trecord_id\x18\x01 \x01(\tR\brecordId\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x03R\aversion\x12\x18\n" +
@@ -522,10 +523,11 @@ const file_sync_proto_rawDesc = "" +
 	"\aAPPLIED\x10\x01\x12\t\n" +
 	"\x05STALE\x10\x02\x12\f\n" +
 	"\bCONFLICT\x10\x03\x12\r\n" +
-	"\tDUPLICATE\x10\x042\x8f\x01\n" +
+	"\tDUPLICATE\x10\x042\xc7\x01\n" +
 	"\vSyncService\x12?\n" +
 	"\x04Pull\x12\x1a.gophkeeper.v1.PullRequest\x1a\x1b.gophkeeper.v1.PullResponse\x12?\n" +
-	"\x04Push\x12\x1a.gophkeeper.v1.PushRequest\x1a\x1b.gophkeeper.v1.PushResponseB\x1aZ\x18gophkeeper/pkg/grpc/syncb\x06proto3"
+	"\x04Push\x12\x1a.gophkeeper.v1.PushRequest\x1a\x1b.gophkeeper.v1.PushResponse\x126\n" +
+	"\x04Ping\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.EmptyB\x1aZ\x18gophkeeper/pkg/grpc/syncb\x06proto3"
 
 var (
 	file_sync_proto_rawDescOnce sync.Once
@@ -550,6 +552,7 @@ var file_sync_proto_goTypes = []any{
 	(*PushRequest)(nil),    // 5: gophkeeper.v1.PushRequest
 	(*PushResponse)(nil),   // 6: gophkeeper.v1.PushResponse
 	(*PushResult)(nil),     // 7: gophkeeper.v1.PushResult
+	(*emptypb.Empty)(nil),  // 8: google.protobuf.Empty
 }
 var file_sync_proto_depIdxs = []int32{
 	4, // 0: gophkeeper.v1.PullResponse.changes:type_name -> gophkeeper.v1.ChangeEnvelope
@@ -559,10 +562,12 @@ var file_sync_proto_depIdxs = []int32{
 	0, // 4: gophkeeper.v1.PushResult.status:type_name -> gophkeeper.v1.PushStatus
 	2, // 5: gophkeeper.v1.SyncService.Pull:input_type -> gophkeeper.v1.PullRequest
 	5, // 6: gophkeeper.v1.SyncService.Push:input_type -> gophkeeper.v1.PushRequest
-	3, // 7: gophkeeper.v1.SyncService.Pull:output_type -> gophkeeper.v1.PullResponse
-	6, // 8: gophkeeper.v1.SyncService.Push:output_type -> gophkeeper.v1.PushResponse
-	7, // [7:9] is the sub-list for method output_type
-	5, // [5:7] is the sub-list for method input_type
+	8, // 7: gophkeeper.v1.SyncService.Ping:input_type -> google.protobuf.Empty
+	3, // 8: gophkeeper.v1.SyncService.Pull:output_type -> gophkeeper.v1.PullResponse
+	6, // 9: gophkeeper.v1.SyncService.Push:output_type -> gophkeeper.v1.PushResponse
+	8, // 10: gophkeeper.v1.SyncService.Ping:output_type -> google.protobuf.Empty
+	8, // [8:11] is the sub-list for method output_type
+	5, // [5:8] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
 	5, // [5:5] is the sub-list for extension extendee
 	0, // [0:5] is the sub-list for field type_name

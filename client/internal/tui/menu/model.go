@@ -45,13 +45,14 @@ type Model struct {
 func New(
 	regFactory func(username, password string) error,
 	loginFactory func(username, password string) error,
+	syncFactory func() error,
 ) Model {
 	return Model{
 		route: routeMenu,
 		items: []menuItem{
 			{"Register", routeRegister, func(m *Model) tea.Cmd { m.reg = auth.New("REGISTER", regFactory); return m.reg.Init() }},
 			{"Login", routeAuth, func(m *Model) tea.Cmd { m.auth = auth.New("LOGIN", loginFactory); return m.auth.Init() }},
-			{"Sync", routeSync, func(m *Model) tea.Cmd { m.sync = sync.New(); return m.sync.Init() }},
+			{"Sync", routeSync, func(m *Model) tea.Cmd { m.sync = sync.New(syncFactory); return m.sync.Init() }},
 			{"Private Data", routeData, func(m *Model) tea.Cmd { m.data = list.New(nil); return tea.WindowSize() }},
 			{"Add New Item", routeNewItem, func(m *Model) tea.Cmd { m.record = record.New(); return m.record.Init() }},
 			{"Help", routeHelp, func(m *Model) tea.Cmd { m.help = help.New(); return m.help.Init() }},
