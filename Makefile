@@ -1,5 +1,7 @@
 SERVER_NAME  = gophkeeper-server
 COMPOSE_FILE = server/docker-compose.yml
+VERSION = v1.0.0
+BUILD_TIME = $(shell date '+%d.%m.%Y')
 
 .PHONY: start
 start:
@@ -22,7 +24,11 @@ restart: stop start
 
 .PHONY: debug
 debug:
-	CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 go build -tags sqlcipher -o client/bin/debug-client-app client/cmd/*.go
+	CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 \
+    go build -tags sqlcipher \
+        -ldflags "-X main.Version=$(VERSION) -X 'main.BuildTime=$(BUILD_TIME)'" \
+        -o client/bin/debug-client-app \
+        client/cmd/*.go
 	./client/bin/debug-client-app
 
 .PHONY: proto

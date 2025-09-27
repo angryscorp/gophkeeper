@@ -4,10 +4,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type Model struct{}
+type Model struct {
+	help func() string
+}
 
-func New() Model {
-	return Model{}
+func New(help func() string) Model {
+	return Model{help: help}
 }
 
 func (m Model) Init() tea.Cmd {
@@ -19,5 +21,5 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return "HELP - TO BE DONE...\n\n(press ←/q to return)"
+	return "HELP\n\n" + m.help()
 }

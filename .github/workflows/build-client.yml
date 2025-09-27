@@ -69,15 +69,28 @@ jobs:
           CXX: ${{ matrix.cxx }}
         run: |
           mkdir -p client/bin
+          
+          # Determine the version from the Git tag or use a short commit hash
+          if git describe --tags --exact-match 2>/dev/null; then
+            VERSION=$(git describe --tags --exact-match)
+          else
+            VERSION="v1.0.0-$(git rev-parse --short HEAD)"
+          fi
+          
+          BUILD_TIME=$(date '+%d.%m.%Y')
+          
+          echo "Building version: $VERSION, build time: $BUILD_TIME"
+          
           if [ "${{ matrix.goos }}" = "linux" ]; then
             # Static building for Linux
             go build -tags sqlcipher \
-              -ldflags '-linkmode external -extldflags "-static"' \
+              -ldflags "-X main.Version=$VERSION -X main.BuildTime=$BUILD_TIME -linkmode external -extldflags \"-static\"" \
               -a -o client/bin/${{ matrix.output }} \
               client/cmd/*.go
           else
             # Dynamic building for Windows and macOS
             go build -tags sqlcipher \
+              -ldflags "-X main.Version=$VERSION -X main.BuildTime=$BUILD_TIME" \
               -o client/bin/${{ matrix.output }} \
               client/cmd/*.go
           fi

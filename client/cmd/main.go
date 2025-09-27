@@ -10,6 +10,11 @@ import (
 
 const cfgFileName = "config.json"
 
+var (
+	Version   string
+	BuildTime string
+)
+
 func main() {
 	// Get executable path
 	execPath, err := os.Executable()

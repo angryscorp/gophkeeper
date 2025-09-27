@@ -8,6 +8,7 @@ import (
 	"gophkeeper/client/internal/tui/menu"
 	"gophkeeper/client/internal/usecase/auth"
 	"gophkeeper/client/internal/usecase/sync"
+	"gophkeeper/pkg/buildinfo"
 	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -50,6 +51,7 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 		func() error {
 			return syncUsecase.Ping()
 		},
+		buildinfo.New(Version, BuildTime).String,
 	)
 	program := tea.NewProgram(mainMenu, tea.WithAltScreen())
 
