@@ -9,29 +9,15 @@ import (
 	"context"
 )
 
-const getAccessToken = `-- name: GetAccessToken :many
-SELECT access_token FROM tokens
+const getAccessToken = `-- name: GetAccessToken :one
+SELECT access_token
+FROM tokens
+WHERE id = 1
 `
 
-func (q *Queries) GetAccessToken(ctx context.Context) ([]string, error) {
-	rows, err := q.db.QueryContext(ctx, getAccessToken)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []string
-	for rows.Next() {
-		var access_token string
-		if err := rows.Scan(&access_token); err != nil {
-			return nil, err
-		}
-		items = append(items, access_token)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) GetAccessToken(ctx context.Context) (string, error) {
+	row := q.db.QueryRowContext(ctx, getAccessToken)
+	var access_token string
+	err := row.Scan(&access_token)
+	return access_token, err
 }

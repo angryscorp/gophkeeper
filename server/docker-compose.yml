@@ -29,10 +29,14 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - ./keys:/run/keys:ro
     environment:
       - SERVER_ADDR=:8443
       - DATABASE_DNS=postgres://db_user:db_password@postgres:5432/gophkeeper?sslmode=disable
       - DEBUG=true
+      - PRIVATE_KEY_PATH=/run/keys/ed25519.key
+      - PUBLIC_KEY_PATH=/run/keys/ed25519.pub
 
 networks:
   app-network:

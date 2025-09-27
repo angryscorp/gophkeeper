@@ -3,51 +3,80 @@ package impl
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"encoding/hex"
+	"fmt"
+	"gophkeeper/client/internal/repository/migration"
 	"gophkeeper/client/internal/repository/tokens"
 	"gophkeeper/client/internal/repository/tokens/db"
-	"gophkeeper/pkg/sqlite"
 )
 
 type Tokens struct {
-	queries *db.Queries
-	db      *sql.DB
+	dbFileName string
+	queries    *db.Queries
+	db         *sql.DB
+	closeDB    func()
 }
 
-func New(dsn, hexMasterKey string) (*Tokens, func(), error) {
-	database, err := sql.Open("sqlite3", dsn)
-	if err != nil {
-		return nil, func() {}, err
+func New(dbFileName string) (*Tokens, func(), error) {
+	t := &Tokens{
+		dbFileName: dbFileName,
+		closeDB:    func() {},
 	}
-
-	if err := sqlite.Unlock(database, hexMasterKey); err != nil {
-		_ = database.Close()
-		return nil, func() {}, err
+	closeFn := func() {
+		if t.db != nil {
+			_ = t.db.Close()
+			t.db = nil
+		}
+		t.queries = nil
+		t.closeDB = nil
 	}
-
-	sqlite.Setup(database)
-
-	return &Tokens{
-		queries: db.New(database),
-		db:      database,
-	}, func() { _ = database.Close() }, nil
+	t.closeDB = closeFn
+	return t, closeFn, nil
 }
 
 var _ tokens.Tokens = (*Tokens)(nil)
 
-func (t Tokens) GetAccessToken(ctx context.Context) (string, error) {
-	dbTokens, err := t.queries.GetAccessToken(ctx)
+func (t *Tokens) Ready() bool {
+	return t.db != nil && t.queries != nil && t.closeDB != nil
+}
+
+func (t *Tokens) Unlock(dataKey []byte) error {
+	// If DB is already open, close it
+	if t.Ready() {
+		t.closeDB()
+	}
+
+	// Compose DSN and open DB
+	hexKey := hex.EncodeToString(dataKey)
+	dsn := fmt.Sprintf("file:%s?_pragma_key=x'%s'", t.dbFileName, hexKey)
+	database, err := sql.Open("sqlite3", dsn)
 	if err != nil {
-		return "", err
+		return err
+	}
+	// Checking that the key is correct and a database is readable
+	var cipherVer string
+	if err := database.QueryRow(`PRAGMA cipher_version;`).Scan(&cipherVer); err != nil {
+		_ = database.Close()
+		return fmt.Errorf("cipher check failed: %w", err)
 	}
 
-	if len(dbTokens) == 0 {
-		return "", errors.New("no tokens found")
+	t.db = database
+	t.closeDB = func() { _ = database.Close() }
+	t.queries = db.New(database)
+
+	// Migration
+	if err := migration.MigrateSQLite(t.db); err != nil {
+		t.closeDB()
+		return fmt.Errorf("migrate: %w", err)
 	}
 
-	if len(dbTokens) > 1 {
-		return "", errors.New("unexpected state")
-	}
+	return nil
+}
 
-	return dbTokens[0], nil
+func (t *Tokens) GetAccessToken(ctx context.Context) (string, error) {
+	return t.queries.GetAccessToken(ctx)
+}
+
+func (t *Tokens) SaveAccessToken(ctx context.Context, token string) error {
+	return t.queries.SaveAccessToken(ctx, token)
 }

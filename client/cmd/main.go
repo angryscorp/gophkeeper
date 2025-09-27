@@ -2,12 +2,10 @@ package main
 
 import (
 	"gophkeeper/client/internal/config"
-	"gophkeeper/client/internal/repository/migration"
 	"log"
 	"os"
-	"path/filepath"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mutecomm/go-sqlcipher/v4"
 )
 
 const cfgFileName = "config.json"
@@ -20,14 +18,8 @@ func main() {
 	}
 
 	// Load config from a file
-	configPath := filepath.Join(filepath.Dir(execPath), cfgFileName)
-	cfg, err := config.LoadFromFile(configPath)
+	cfg, err := config.LoadFromFile(execPath, cfgFileName)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Database migrations
-	if err := migration.MigrateSQLite(cfg.DatabaseDSN(), "hexMasterKey"); err != nil {
 		log.Fatal(err)
 	}
 

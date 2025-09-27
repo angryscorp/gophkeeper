@@ -3,12 +3,3 @@
 //   sqlc v1.30.0
 
 package db
-
-import (
-	"github.com/google/uuid"
-)
-
-type User struct {
-	ID       uuid.UUID
-	Username string
-}

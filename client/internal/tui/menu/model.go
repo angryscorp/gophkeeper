@@ -6,9 +6,7 @@ import (
 	"gophkeeper/client/internal/tui/help"
 	"gophkeeper/client/internal/tui/list"
 	"gophkeeper/client/internal/tui/record"
-	"gophkeeper/client/internal/tui/register"
 	"gophkeeper/client/internal/tui/sync"
-	usecaseAuth "gophkeeper/client/internal/usecase/auth"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -36,7 +34,7 @@ type Model struct {
 	route  route
 	items  []menuItem
 	cursor int
-	reg    register.Model
+	reg    auth.Model
 	auth   auth.Model
 	sync   sync.Model
 	data   list.Model
@@ -45,17 +43,18 @@ type Model struct {
 }
 
 func New(
-	regFactory func() *usecaseAuth.Auth,
+	regFactory func(username, password string) error,
+	loginFactory func(username, password string) error,
 ) Model {
 	return Model{
 		route: routeMenu,
 		items: []menuItem{
-			{"Register", routeRegister, func(m *Model) tea.Cmd { m.reg = register.New(regFactory()); return m.reg.Init() }},
-			{"Login", routeAuth, func(m *Model) tea.Cmd { m.auth = auth.New(); return nil }},
-			{"Sync", routeSync, func(m *Model) tea.Cmd { m.sync = sync.New(); return nil }},
+			{"Register", routeRegister, func(m *Model) tea.Cmd { m.reg = auth.New("REGISTER", regFactory); return m.reg.Init() }},
+			{"Login", routeAuth, func(m *Model) tea.Cmd { m.auth = auth.New("LOGIN", loginFactory); return m.auth.Init() }},
+			{"Sync", routeSync, func(m *Model) tea.Cmd { m.sync = sync.New(); return m.sync.Init() }},
 			{"Private Data", routeData, func(m *Model) tea.Cmd { m.data = list.New(nil); return tea.WindowSize() }},
-			{"Add New Item", routeNewItem, func(m *Model) tea.Cmd { m.record = record.New(); return nil }},
-			{"Help", routeHelp, func(m *Model) tea.Cmd { m.help = help.New(); return nil }},
+			{"Add New Item", routeNewItem, func(m *Model) tea.Cmd { m.record = record.New(); return m.record.Init() }},
+			{"Help", routeHelp, func(m *Model) tea.Cmd { m.help = help.New(); return m.help.Init() }},
 			{"Quit", routeQuit, func(m *Model) tea.Cmd { return tea.Quit }},
 		},
 		cursor: 1,
