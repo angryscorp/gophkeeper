@@ -2,8 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS tokens (
     id           INTEGER PRIMARY KEY CHECK (id = 1),
-    access_token TEXT NOT NULL,
-    created_at   INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+    access_token TEXT NOT NULL
 );
 -- +goose StatementEnd
 

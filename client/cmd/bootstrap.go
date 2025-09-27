@@ -17,7 +17,7 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	var closeFuncs []func()
 
 	// Repositories initialization
-	repo, closeDB, err := tokenrepo.New(cfg.DatabaseDSN(), "hexMasterKey")
+	repo, closeDB, err := tokenrepo.New(cfg.DBFileName)
 	if err != nil {
 		panic(err)
 	}

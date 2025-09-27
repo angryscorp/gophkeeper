@@ -25,8 +25,10 @@ restart: stop start
 
 .PHONY: debug
 debug:
-	GOOS=darwin GOARCH=arm64 go build -o $(CLIENT_BIN)/$(CLIENT_NAME)-darwin-arm64 $(CLIENT_SRC)/*.go
-	 ./client/bin/gophkeeper-client-darwin-arm64
+	CGO_ENABLED=1 \
+	GOOS=darwin GOARCH=arm64 \
+	go build -tags sqlcipher -o $(CLIENT_BIN)/$(CLIENT_NAME)-darwin-arm64 client/cmd/*.go
+	./client/bin/gophkeeper-client-darwin-arm64
 
 .PHONY: proto
 proto:

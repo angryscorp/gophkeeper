@@ -13,11 +13,10 @@ const saveAccessToken = `-- name: SaveAccessToken :exec
 INSERT INTO tokens (id, access_token)
 VALUES (1, ?1)
 ON CONFLICT(id) DO UPDATE
-    SET access_token = excluded.access_token,
-        created_at   = excluded.created_at
+    SET access_token = excluded.access_token
 `
 
-func (q *Queries) SaveAccessToken(ctx context.Context, token string) error {
-	_, err := q.db.ExecContext(ctx, saveAccessToken, token)
+func (q *Queries) SaveAccessToken(ctx context.Context, accessToken string) error {
+	_, err := q.db.ExecContext(ctx, saveAccessToken, accessToken)
 	return err
 }

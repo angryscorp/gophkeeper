@@ -70,7 +70,6 @@ func (auth *Auth) Register(username, password string) error {
 		authKey,
 		crypto.DefaultAuthKeyAlgorithm(),
 	)
-
 }
 
 func (auth *Auth) Login(username, password string) error {
@@ -107,6 +106,12 @@ func (auth *Auth) Login(username, password string) error {
 
 	// Finish login
 	token, err := auth.client.LoginFinish(ctx, username, deviceName, challengeResponse)
+	if err != nil {
+		return err
+	}
+
+	// Password is correct, unlock DB
+	err = auth.repo.Unlock(dataKey)
 	if err != nil {
 		return err
 	}

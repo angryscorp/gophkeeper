@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-sqlite3 v1.14.32
+	github.com/mutecomm/go-sqlcipher/v4 v4.4.2
 	github.com/pressly/goose/v3 v3.25.0
 	golang.org/x/crypto v0.40.0
 	google.golang.org/grpc v1.75.1
