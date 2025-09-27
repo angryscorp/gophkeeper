@@ -17,10 +17,9 @@ func NewVerifier(publicKey ed25519.PublicKey, aud string) *Verifier {
 	return &Verifier{publicKey: publicKey, aud: aud}
 }
 
-func (v *Verifier) ParseAndVerify(tokenStr string) (*Claims, error) {
+func (v *Verifier) Verify(tokenStr string) error {
 	ac := &AccessClaims{}
-
-	tok, err := jwt.ParseWithClaims(
+	token, err := jwt.ParseWithClaims(
 		tokenStr,
 		ac,
 		func(t *jwt.Token) (interface{}, error) {
@@ -35,13 +34,13 @@ func (v *Verifier) ParseAndVerify(tokenStr string) (*Claims, error) {
 		jwt.WithExpirationRequired(),
 	)
 
-	if err != nil || !tok.Valid {
-		return nil, errors.New("invalid jwt")
+	if err != nil {
+		return err
 	}
 
-	return &Claims{
-		Sub:      ac.Subject,
-		DeviceID: ac.DeviceID,
-		Exp:      ac.ExpiresAt.Time,
-	}, nil
+	if !token.Valid {
+		return errors.New("invalid token")
+	}
+
+	return nil
 }

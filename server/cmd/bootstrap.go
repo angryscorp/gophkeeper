@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	grpcauth "gophkeeper/pkg/grpc/auth"
+	grpcsync "gophkeeper/pkg/grpc/sync"
 	"gophkeeper/server/internal/config"
 	serverauth "gophkeeper/server/internal/grpc/auth"
+	serversync "gophkeeper/server/internal/grpc/sync"
 	challengesrepo "gophkeeper/server/internal/repository/challenges/impl"
 	usersrepo "gophkeeper/server/internal/repository/users/impl"
 	"gophkeeper/server/internal/tokens"
@@ -33,9 +34,6 @@ func bootstrap(cfg config.Config) (*grpc.Server, []func()) {
 	signer := tokens.NewSigner(privateKey, audience, accessTokenTTL)
 	verifier := tokens.NewVerifier(publicKey, audience)
 
-	// Debug
-	fmt.Printf("\nSigner: %+v\n\nVerifier: %+v\n\n", signer, verifier)
-
 	// Repositories initialization
 	repoUsers, closeDB, err := usersrepo.New(cfg.DatabaseDSN)
 	if err != nil {
@@ -50,16 +48,25 @@ func bootstrap(cfg config.Config) (*grpc.Server, []func()) {
 	closeFuncs = append(closeFuncs, closeDB)
 
 	// gRPC server initialization
-	grpcServer := grpc.NewServer()
+	server := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			serversync.UnaryAuthForSync(verifier),
+		),
+	)
 	grpcauth.RegisterAuthServiceServer(
-		grpcServer,
+		server,
 		serverauth.New(
 			auth.New(repoUsers, repoChallenges, signer),
 		),
 	)
+	grpcsync.RegisterSyncServiceServer(
+		server,
+		serversync.New(),
+	)
+
 	if cfg.Debug {
-		reflection.Register(grpcServer)
+		reflection.Register(server)
 	}
 
-	return grpcServer, closeFuncs
+	return server, closeFuncs
 }

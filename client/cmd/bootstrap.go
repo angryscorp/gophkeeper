@@ -3,11 +3,12 @@ package main
 import (
 	"gophkeeper/client/internal/config"
 	grpcauth "gophkeeper/client/internal/grpc/auth"
+	grpcsync "gophkeeper/client/internal/grpc/sync"
 	tokenrepo "gophkeeper/client/internal/repository/tokens/impl"
 	"gophkeeper/client/internal/tui/menu"
 	"gophkeeper/client/internal/usecase/auth"
+	"gophkeeper/client/internal/usecase/sync"
 	"log"
-	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"google.golang.org/grpc"
@@ -36,16 +37,18 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 
 	// gRPC client
 	authClient := grpcauth.New(conn)
+	syncClient := grpcsync.New(conn)
+
+	// Usecases
+	authUsecase := auth.New(authClient, repo)
+	syncUsecase := sync.New(syncClient, repo)
 
 	// TUI
-	authUsecase := auth.New(authClient, repo)
 	mainMenu := menu.New(
 		authUsecase.Register,
 		authUsecase.Login,
 		func() error {
-			// Debug TUI
-			time.Sleep(2 * time.Second)
-			return nil
+			return syncUsecase.Ping()
 		},
 	)
 	program := tea.NewProgram(mainMenu, tea.WithAltScreen())

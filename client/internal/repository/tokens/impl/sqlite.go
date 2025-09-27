@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"gophkeeper/client/internal/repository/migration"
 	"gophkeeper/client/internal/repository/tokens"
@@ -74,9 +75,15 @@ func (t *Tokens) Unlock(dataKey []byte) error {
 }
 
 func (t *Tokens) GetAccessToken(ctx context.Context) (string, error) {
+	if !t.Ready() {
+		return "", errors.New("db is not ready")
+	}
 	return t.queries.GetAccessToken(ctx)
 }
 
 func (t *Tokens) SaveAccessToken(ctx context.Context, token string) error {
+	if !t.Ready() {
+		return errors.New("db is not ready")
+	}
 	return t.queries.SaveAccessToken(ctx, token)
 }
