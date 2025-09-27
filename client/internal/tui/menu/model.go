@@ -46,6 +46,7 @@ func New(
 	regFactory func(username, password string) error,
 	loginFactory func(username, password string) error,
 	syncFactory func() error,
+	helpFactory func() string,
 ) Model {
 	return Model{
 		route: routeMenu,
@@ -55,7 +56,7 @@ func New(
 			{"Sync", routeSync, func(m *Model) tea.Cmd { m.sync = sync.New(syncFactory); return m.sync.Init() }},
 			{"Private Data", routeData, func(m *Model) tea.Cmd { m.data = list.New(nil); return tea.WindowSize() }},
 			{"Add New Item", routeNewItem, func(m *Model) tea.Cmd { m.record = record.New(); return m.record.Init() }},
-			{"Help", routeHelp, func(m *Model) tea.Cmd { m.help = help.New(); return m.help.Init() }},
+			{"Help", routeHelp, func(m *Model) tea.Cmd { m.help = help.New(helpFactory); return m.help.Init() }},
 			{"Quit", routeQuit, func(m *Model) tea.Cmd { return tea.Quit }},
 		},
 		cursor: 1,
