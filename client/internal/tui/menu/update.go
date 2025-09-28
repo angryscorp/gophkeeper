@@ -1,6 +1,8 @@
 package menu
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	tea "github.com/charmbracelet/bubbletea"
+)
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.route {
@@ -8,7 +10,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.update(msg)
 
 	case routeRegister, routeAuth, routeSync, routeData, routeNewItem, routeHelp:
-		return handleSubModelUpdate(&m, msg)
+		return handleSubModelUpdate(m, msg)
 
 	default:
 		return m, nil
@@ -44,7 +46,7 @@ func (m Model) update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func handleSubModelUpdate(m *Model, msg tea.Msg) (tea.Model, tea.Cmd) {
+func handleSubModelUpdate(m Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 	if isExitKey(msg) {
 		m.route = routeMenu
 		return m, nil

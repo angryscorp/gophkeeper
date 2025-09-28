@@ -13,16 +13,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.route {
 	case routeTypeSelection:
 		return m.update(msg)
-
 	case routeBankCardForm, routeCredentialsForm, routeTextDataForm, routeBinaryDataForm:
-		return handleSubModelUpdate(&m, msg)
-
+		return handleSubModelUpdate(m, msg)
 	default:
 		return m, nil
 	}
 }
 
-func handleSubModelUpdate(m *Model, msg tea.Msg) (tea.Model, tea.Cmd) {
+func handleSubModelUpdate(m Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch m.route {
 	case routeBankCardForm:
@@ -51,8 +49,7 @@ func (m Model) update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor++
 			}
 		case "enter", " ":
-			selectedItem := m.menuItems[m.cursor]
-			m.route = selectedItem.route
+			m.route = m.menuItems[m.cursor].route
 			return m.initSubModel()
 		}
 	}
