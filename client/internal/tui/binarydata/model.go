@@ -1,4 +1,4 @@
-package credentials
+package binarydata
 
 import (
 	"github.com/charmbracelet/bubbles/textinput"
@@ -11,29 +11,22 @@ type field struct {
 }
 
 type Model struct {
-	fields  []field
-	focused int
+	fields     []field
+	focused    int
+	fileExists bool
+	fileSize   int64
 }
 
 func New() Model {
 	return Model{
 		fields: []field{
 			{
-				title: "Username",
-				input: initInputWithPlaceholder("username"),
-			},
-			{
-				title: "Password",
-				input: func() textinput.Model {
-					input := initInputWithPlaceholder("username")
-					input.EchoMode = textinput.EchoPassword
-					input.EchoCharacter = '•'
-					return input
-				}(),
+				title: "File Path",
+				input: initInputWithPlaceholder("/path/to/file"),
 			},
 			{
 				title: "Note",
-				input: initInputWithPlaceholder("Any additional information"),
+				input: initInputWithPlaceholder("File description"),
 			},
 		},
 	}
