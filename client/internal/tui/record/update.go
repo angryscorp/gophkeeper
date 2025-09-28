@@ -3,6 +3,7 @@ package record
 import (
 	"gophkeeper/client/internal/tui/bankcard"
 	"gophkeeper/client/internal/tui/binarydata"
+	"gophkeeper/client/internal/tui/common"
 	"gophkeeper/client/internal/tui/credentials"
 	"gophkeeper/client/internal/tui/textdata"
 
@@ -24,13 +25,13 @@ func handleSubModelUpdate(m Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch m.route {
 	case routeBankCardForm:
-		m.bankCard, cmd = updateSubModel(m.bankCard, msg)
+		m.bankCard, cmd = common.UpdateSubModel(m.bankCard, msg)
 	case routeCredentialsForm:
-		m.credentials, cmd = updateSubModel(m.credentials, msg)
+		m.credentials, cmd = common.UpdateSubModel(m.credentials, msg)
 	case routeTextDataForm:
-		m.textData, cmd = updateSubModel(m.textData, msg)
+		m.textData, cmd = common.UpdateSubModel(m.textData, msg)
 	case routeBinaryDataForm:
-		m.binaryData, cmd = updateSubModel(m.binaryData, msg)
+		m.binaryData, cmd = common.UpdateSubModel(m.binaryData, msg)
 	default:
 	}
 
@@ -54,21 +55,6 @@ func (m Model) update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 	return m, nil
-}
-
-func updateSubModel[T any](subModel T, msg tea.Msg) (T, tea.Cmd) {
-	updater, ok := any(subModel).(interface {
-		Update(tea.Msg) (tea.Model, tea.Cmd)
-	})
-	if !ok {
-		return subModel, nil
-	}
-
-	newSub, cmd := updater.Update(msg)
-	if nm, ok := newSub.(T); ok {
-		return nm, cmd
-	}
-	return subModel, cmd
 }
 
 func (m Model) initSubModel() (tea.Model, tea.Cmd) {

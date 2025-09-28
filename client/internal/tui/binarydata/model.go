@@ -1,6 +1,8 @@
 package binarydata
 
 import (
+	"gophkeeper/client/internal/tui/common"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -22,11 +24,11 @@ func New() Model {
 		fields: []field{
 			{
 				title: "File Path",
-				input: initInputWithPlaceholder("/path/to/file"),
+				input: common.InputWithPlaceholder("/path/to/file"),
 			},
 			{
 				title: "Note",
-				input: initInputWithPlaceholder("File description"),
+				input: common.InputWithPlaceholder("File description"),
 			},
 		},
 	}
@@ -34,11 +36,4 @@ func New() Model {
 
 func (m Model) Init() tea.Cmd {
 	return m.fields[0].input.Focus()
-}
-
-func initInputWithPlaceholder(placeholder string) textinput.Model {
-	input := textinput.New()
-	input.Placeholder = placeholder
-	input.Width = len(placeholder)
-	return input
 }

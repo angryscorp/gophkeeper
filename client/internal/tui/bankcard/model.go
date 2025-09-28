@@ -1,6 +1,8 @@
 package bankcard
 
 import (
+	"gophkeeper/client/internal/tui/common"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -23,19 +25,19 @@ func New() Model {
 		fields: []field{
 			{
 				title: "Cardholder Name",
-				input: initInputWithPlaceholder("John Doe"),
+				input: common.InputWithPlaceholder("John Doe"),
 			},
 			{
 				title: "Card Number",
-				input: initInputWithPlaceholder("1234 5678 9012 3456"),
+				input: common.InputWithPlaceholder("1234 5678 9012 3456"),
 			},
 			{
 				title: "Expiry",
-				input: initInputWithPlaceholder("MM/YY"),
+				input: common.InputWithPlaceholder("MM/YY"),
 			},
 			{
 				title: "CVC",
-				input: initInputWithPlaceholder("123"),
+				input: common.InputWithPlaceholder("123"),
 			},
 		},
 	}
@@ -43,11 +45,4 @@ func New() Model {
 
 func (m Model) Init() tea.Cmd {
 	return m.fields[0].input.Focus()
-}
-
-func initInputWithPlaceholder(placeholder string) textinput.Model {
-	input := textinput.New()
-	input.Placeholder = placeholder
-	input.Width = len(placeholder)
-	return input
 }

@@ -1,6 +1,8 @@
 package credentials
 
 import (
+	"gophkeeper/client/internal/tui/common"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -20,12 +22,12 @@ func New() Model {
 		fields: []field{
 			{
 				title: "Username",
-				input: initInputWithPlaceholder("username"),
+				input: common.InputWithPlaceholder("username"),
 			},
 			{
 				title: "Password",
 				input: func() textinput.Model {
-					input := initInputWithPlaceholder("username")
+					input := common.InputWithPlaceholder("username")
 					input.EchoMode = textinput.EchoPassword
 					input.EchoCharacter = '•'
 					return input
@@ -33,7 +35,7 @@ func New() Model {
 			},
 			{
 				title: "Note",
-				input: initInputWithPlaceholder("Any additional information"),
+				input: common.InputWithPlaceholder("Any additional information"),
 			},
 		},
 	}
@@ -41,11 +43,4 @@ func New() Model {
 
 func (m Model) Init() tea.Cmd {
 	return m.fields[0].input.Focus()
-}
-
-func initInputWithPlaceholder(placeholder string) textinput.Model {
-	input := textinput.New()
-	input.Placeholder = placeholder
-	input.Width = len(placeholder)
-	return input
 }

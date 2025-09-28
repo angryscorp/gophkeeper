@@ -1,6 +1,7 @@
 package binarydata
 
 import (
+	"gophkeeper/client/internal/tui/common"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -24,12 +25,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 	m.fields[m.focused].input, cmd = m.fields[m.focused].input.Update(msg)
-	currentWidth := len(m.fields[m.focused].input.Value())
-	if m.fields[m.focused].input.Width < currentWidth {
-		m.fields[m.focused].input.Width = currentWidth
-	}
+	common.ExtendInputWidthIfNeeded(&m.fields[m.focused].input)
 
-	// Check file existence when a file path changes
 	if m.focused == 0 {
 		m.fileExists, m.fileSize = checkFilePath(m.fields[0].input.Value())
 	}

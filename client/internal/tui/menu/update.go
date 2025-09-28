@@ -1,6 +1,8 @@
 package menu
 
 import (
+	"gophkeeper/client/internal/tui/common"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -55,17 +57,17 @@ func handleSubModelUpdate(m Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch m.route {
 	case routeRegister:
-		m.reg, cmd = updateSubModel(m.reg, msg)
+		m.reg, cmd = common.UpdateSubModel(m.reg, msg)
 	case routeAuth:
-		m.auth, cmd = updateSubModel(m.auth, msg)
+		m.auth, cmd = common.UpdateSubModel(m.auth, msg)
 	case routeSync:
-		m.sync, cmd = updateSubModel(m.sync, msg)
+		m.sync, cmd = common.UpdateSubModel(m.sync, msg)
 	case routeData:
-		m.data, cmd = updateSubModel(m.data, msg)
+		m.data, cmd = common.UpdateSubModel(m.data, msg)
 	case routeNewItem:
-		m.record, cmd = updateSubModel(m.record, msg)
+		m.record, cmd = common.UpdateSubModel(m.record, msg)
 	case routeHelp:
-		m.help, cmd = updateSubModel(m.help, msg)
+		m.help, cmd = common.UpdateSubModel(m.help, msg)
 	default:
 	}
 
@@ -79,19 +81,4 @@ func isExitKey(msg tea.Msg) bool {
 		return km.Type == tea.KeyEsc || km.String() == "left" || km.String() == "q"
 	}
 	return false
-}
-
-func updateSubModel[T any](subModel T, msg tea.Msg) (T, tea.Cmd) {
-	updater, ok := any(subModel).(interface {
-		Update(tea.Msg) (tea.Model, tea.Cmd)
-	})
-	if !ok {
-		return subModel, nil
-	}
-
-	newSub, cmd := updater.Update(msg)
-	if nm, ok := newSub.(T); ok {
-		return nm, cmd
-	}
-	return subModel, cmd
 }
