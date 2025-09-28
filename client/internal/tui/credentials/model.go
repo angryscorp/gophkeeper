@@ -1,4 +1,4 @@
-package bankcard
+package credentials
 
 import (
 	"github.com/charmbracelet/bubbles/textinput"
@@ -15,27 +15,26 @@ type Model struct {
 	focused int
 }
 
-func (m Model) Focused() int {
-	return m.focused
-}
 func New() Model {
+
 	return Model{
 		fields: []field{
 			{
-				title: "Cardholder Name",
-				input: initInputWithPlaceholder("John Doe"),
+				title: "Username",
+				input: initInputWithPlaceholder("username"),
 			},
 			{
-				title: "Card Number",
-				input: initInputWithPlaceholder("1234 5678 9012 3456"),
+				title: "Password",
+				input: func() textinput.Model {
+					input := initInputWithPlaceholder("username")
+					input.EchoMode = textinput.EchoPassword
+					input.EchoCharacter = '•'
+					return input
+				}(),
 			},
 			{
-				title: "Expiry",
-				input: initInputWithPlaceholder("MM/YY"),
-			},
-			{
-				title: "CVC",
-				input: initInputWithPlaceholder("123"),
+				title: "Note",
+				input: initInputWithPlaceholder("Any additional information"),
 			},
 		},
 	}
