@@ -4,6 +4,7 @@ import (
 	"context"
 	"gophkeeper/pkg/crypto"
 	"gophkeeper/pkg/grpc/auth"
+	"gophkeeper/pkg/grpc/mapper"
 
 	"google.golang.org/grpc"
 )
@@ -19,10 +20,10 @@ func New(conn *grpc.ClientConn) *Client {
 func (c Client) Register(ctx context.Context, username string, kdf crypto.KDFParameters, edKey, authKey []byte, algorithm crypto.AuthKeyAlgorithm) error {
 	req := &auth.RegisterRequest{
 		Username:         username,
-		Kdf:              mapKDFToGRPC(kdf),
+		Kdf:              mapper.KdfParametersToGRPC(kdf),
 		EncryptedDataKey: edKey,
 		AuthKey:          authKey,
-		AuthKeyAlg:       mapAuthAlgoToRPC(algorithm),
+		AuthKeyAlg:       mapper.AuthAlgoToGRPC(algorithm),
 	}
 
 	_, err := c.client.Register(ctx, req)
@@ -31,4 +32,30 @@ func (c Client) Register(ctx context.Context, username string, kdf crypto.KDFPar
 	}
 
 	return nil
+}
+
+func (c Client) LoginStart(ctx context.Context, username string, deviceName string) (crypto.LoginPayload, error) {
+	resp, err := c.client.LoginStart(ctx, &auth.LoginStartRequest{Username: username, DeviceName: deviceName})
+	if err != nil {
+		return crypto.LoginPayload{}, err
+	}
+	return crypto.LoginPayload{
+		DeviceId:         resp.DeviceId,
+		KDFParameters:    mapper.KdfParametersToDomain(resp.Kdf),
+		EncryptedDataKey: resp.EncryptedDataKey,
+		AuthKeyAlgorithm: mapper.AuthAlgoToDomain(resp.AuthKeyAlg),
+		Challenge:        resp.Challenge,
+	}, nil
+}
+
+func (c Client) LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) (string, error) {
+	resp, err := c.client.LoginFinish(ctx, &auth.LoginFinishRequest{
+		Username: username,
+		DeviceId: deviceName,
+		Response: challenge,
+	})
+	if err != nil {
+		return "", err
+	}
+	return resp.AccessToken, nil
 }

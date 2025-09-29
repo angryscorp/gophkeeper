@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -21,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	SyncService_Pull_FullMethodName = "/gophkeeper.v1.SyncService/Pull"
 	SyncService_Push_FullMethodName = "/gophkeeper.v1.SyncService/Push"
+	SyncService_Ping_FullMethodName = "/gophkeeper.v1.SyncService/Ping"
 )
 
 // SyncServiceClient is the client API for SyncService service.
@@ -31,6 +33,7 @@ const (
 type SyncServiceClient interface {
 	Pull(ctx context.Context, in *PullRequest, opts ...grpc.CallOption) (*PullResponse, error)
 	Push(ctx context.Context, in *PushRequest, opts ...grpc.CallOption) (*PushResponse, error)
+	Ping(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type syncServiceClient struct {
@@ -61,6 +64,16 @@ func (c *syncServiceClient) Push(ctx context.Context, in *PushRequest, opts ...g
 	return out, nil
 }
 
+func (c *syncServiceClient) Ping(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, SyncService_Ping_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SyncServiceServer is the server API for SyncService service.
 // All implementations must embed UnimplementedSyncServiceServer
 // for forward compatibility.
@@ -69,6 +82,7 @@ func (c *syncServiceClient) Push(ctx context.Context, in *PushRequest, opts ...g
 type SyncServiceServer interface {
 	Pull(context.Context, *PullRequest) (*PullResponse, error)
 	Push(context.Context, *PushRequest) (*PushResponse, error)
+	Ping(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	mustEmbedUnimplementedSyncServiceServer()
 }
 
@@ -84,6 +98,9 @@ func (UnimplementedSyncServiceServer) Pull(context.Context, *PullRequest) (*Pull
 }
 func (UnimplementedSyncServiceServer) Push(context.Context, *PushRequest) (*PushResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Push not implemented")
+}
+func (UnimplementedSyncServiceServer) Ping(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
 func (UnimplementedSyncServiceServer) mustEmbedUnimplementedSyncServiceServer() {}
 func (UnimplementedSyncServiceServer) testEmbeddedByValue()                     {}
@@ -142,6 +159,24 @@ func _SyncService_Push_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SyncService_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SyncServiceServer).Ping(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SyncService_Ping_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SyncServiceServer).Ping(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SyncService_ServiceDesc is the grpc.ServiceDesc for SyncService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -156,6 +191,10 @@ var SyncService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Push",
 			Handler:    _SyncService_Push_Handler,
+		},
+		{
+			MethodName: "Ping",
+			Handler:    _SyncService_Ping_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

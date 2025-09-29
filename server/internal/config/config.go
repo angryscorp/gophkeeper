@@ -7,9 +7,11 @@ import (
 )
 
 type Config struct {
-	DatabaseDSN string `env:"DATABASE_DNS"`
-	ServerAddr  string `env:"SERVER_ADDR"`
-	Debug       bool   `env:"DEBUG"`
+	DatabaseDSN    string `env:"DATABASE_DNS"`
+	ServerAddr     string `env:"SERVER_ADDR"`
+	Debug          bool   `env:"DEBUG"`
+	PrivateKeyPath string `env:"PRIVATE_KEY_PATH"`
+	PublicKeyPath  string `env:"PUBLIC_KEY_PATH"`
 }
 
 func LoadFromEnv() (Config, error) {

@@ -4,6 +4,12 @@ import (
 	"gophkeeper/server/internal/config"
 	"gophkeeper/server/internal/repository/migration"
 	"log"
+	"time"
+)
+
+const (
+	audience       = "gophkeeper"
+	accessTokenTTL = 15 * time.Minute
 )
 
 func main() {

@@ -1,11 +1,8 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE tokens (
-    access_token TEXT NOT NULL,
-    refresh_token TEXT NOT NULL,
-    expires_at INTEGER NOT NULL, -- Unix timestamp
-    created_at INTEGER DEFAULT (strftime('%s', 'now')),
-    updated_at INTEGER DEFAULT (strftime('%s', 'now'))
+CREATE TABLE IF NOT EXISTS tokens (
+    id           INTEGER PRIMARY KEY CHECK (id = 1),
+    access_token TEXT NOT NULL
 );
 -- +goose StatementEnd
 

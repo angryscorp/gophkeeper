@@ -13,6 +13,21 @@ sql:
           - db_type: "uuid"
             go_type: "github.com/google/uuid.UUID"
 
+  - engine: "postgresql"
+    queries: "./server/internal/repository/challenges/queries"
+    schema: "./server/internal/repository/migration/migrations"
+    gen:
+      go:
+        package: "db"
+        out: "./server/internal/repository/challenges/db"
+        sql_package: "pgx/v5"
+        omit_unused_structs: true
+        overrides:
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+
   - engine: "sqlite"
     queries: "./client/internal/repository/tokens/queries"
     schema: "./client/internal/repository/migration/migrations"

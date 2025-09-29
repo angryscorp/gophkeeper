@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 type Config struct {
@@ -13,21 +14,24 @@ type Config struct {
 	Debug           bool   `json:"debug"`
 }
 
-func LoadFromFile(filePath string) (Config, error) {
+func LoadFromFile(execPath, fileName string) (Config, error) {
+	execDir := filepath.Dir(execPath)
+	configPath := filepath.Join(execDir, fileName)
+
 	cfg := Config{}
 
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(configPath)
 	if err != nil {
-		return cfg, fmt.Errorf("failed to read config file (%s): %w", filePath, err)
+		return cfg, fmt.Errorf("failed to read config file (%s): %w", configPath, err)
 	}
 
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		return cfg, fmt.Errorf("failed to parse JSON config: %w", err)
 	}
 
-	return cfg, nil
-}
+	if cfg.DBFileName != "" {
+		cfg.DBFileName = filepath.Join(execDir, cfg.DBFileName)
+	}
 
-func (c Config) DatabaseDSN() string {
-	return fmt.Sprintf("file:%s?_pragma=busy_timeout=%d", c.DBFileName, c.BusyTimeoutInMs)
+	return cfg, nil
 }
