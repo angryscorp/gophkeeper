@@ -64,7 +64,7 @@ func (m Model) initSubModel() (tea.Model, tea.Cmd) {
 		m.bankCard = bankcard.New()
 		cmd = m.bankCard.Init()
 	case routeCredentialsForm:
-		m.credentials = credentials.New()
+		m.credentials = credentials.New(m.dataSaver.SaveCredentials)
 		cmd = m.credentials.Init()
 	case routeTextDataForm:
 		m.textData = textdata.New()

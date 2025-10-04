@@ -13,7 +13,6 @@ import (
 type menuItem struct {
 	title       string
 	description string
-	infoType    domain.UserInfoType
 	route       recordRoute
 }
 
@@ -26,9 +25,11 @@ type Model struct {
 	credentials credentials.Model
 	textData    textdata.Model
 	binaryData  binarydata.Model
+
+	dataSaver domain.UserInfoSaver
 }
 
-func New() Model {
+func New(dataSaver domain.UserInfoSaver) Model {
 	return Model{
 		route:  routeTypeSelection,
 		cursor: 0,
@@ -36,28 +37,25 @@ func New() Model {
 			{
 				title:       "💳 Bank Card",
 				description: "Credit/Debit card information",
-				infoType:    domain.UserInfoTypeBankCard,
 				route:       routeBankCardForm,
 			},
 			{
 				title:       "🔑 Credentials",
 				description: "Username and password",
-				infoType:    domain.UserInfoTypeCredentials,
 				route:       routeCredentialsForm,
 			},
 			{
 				title:       "📝 Text Data",
 				description: "Notes and text information",
-				infoType:    domain.UserInfoTypeUserTextData,
 				route:       routeTextDataForm,
 			},
 			{
 				title:       "📁 Binary Data",
 				description: "Files and binary information",
-				infoType:    domain.UserInfoTypeUserBinaryData,
 				route:       routeBinaryDataForm,
 			},
 		},
+		dataSaver: dataSaver,
 	}
 }
 

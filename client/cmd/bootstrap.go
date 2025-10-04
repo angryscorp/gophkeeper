@@ -7,6 +7,7 @@ import (
 	tokenrepo "gophkeeper/client/internal/repository/tokens/impl"
 	"gophkeeper/client/internal/tui/menu"
 	"gophkeeper/client/internal/usecase/auth"
+	"gophkeeper/client/internal/usecase/save"
 	"gophkeeper/client/internal/usecase/sync"
 	"gophkeeper/pkg/buildinfo"
 	"log"
@@ -43,11 +44,13 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	// Usecases
 	authUsecase := auth.New(authClient, repo)
 	syncUsecase := sync.New(syncClient, repo)
+	saveUsecase := save.UserInfoSaver{}
 
 	// TUI
 	mainMenu := menu.New(
 		authUsecase.Register,
 		authUsecase.Login,
+		saveUsecase,
 		func() error {
 			return syncUsecase.Ping()
 		},

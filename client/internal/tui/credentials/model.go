@@ -1,6 +1,7 @@
 package credentials
 
 import (
+	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/tui/common"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -13,11 +14,13 @@ type field struct {
 }
 
 type Model struct {
-	fields  []field
-	focused int
+	fields    []field
+	focused   int
+	saver     func(domain.Credentials) error
+	resultMsg string
 }
 
-func New() Model {
+func New(saver func(domain.Credentials) error) Model {
 	return Model{
 		fields: []field{
 			{
@@ -27,7 +30,7 @@ func New() Model {
 			{
 				title: "Password",
 				input: func() textinput.Model {
-					input := common.InputWithPlaceholder("username")
+					input := common.InputWithPlaceholder("password")
 					input.EchoMode = textinput.EchoPassword
 					input.EchoCharacter = '•'
 					return input
@@ -38,6 +41,7 @@ func New() Model {
 				input: common.InputWithPlaceholder("Any additional information"),
 			},
 		},
+		saver: saver,
 	}
 }
 

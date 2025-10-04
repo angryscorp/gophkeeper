@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/tui/auth"
 	"gophkeeper/client/internal/tui/help"
 	"gophkeeper/client/internal/tui/list"
@@ -33,6 +34,7 @@ type Model struct {
 func New(
 	regFactory func(username, password string) error,
 	loginFactory func(username, password string) error,
+	dataSaver domain.UserInfoSaver,
 	syncFactory func() error,
 	helpFactory func() string,
 ) Model {
@@ -67,7 +69,7 @@ func New(
 				"💳 Add New Item",
 				"Add data to the vault",
 				routeNewItem,
-				func(m *Model) tea.Cmd { m.record = record.New(); return m.record.Init() },
+				func(m *Model) tea.Cmd { m.record = record.New(dataSaver); return m.record.Init() },
 			},
 			{
 				"📚 Help",

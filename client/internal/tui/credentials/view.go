@@ -6,6 +6,12 @@ func (m Model) View() string {
 	var b strings.Builder
 	b.WriteString("🔑 Credentials\n\n")
 
+	if m.resultMsg != "" {
+		b.WriteString(m.resultMsg)
+		b.WriteString("\n\n(use enter/space to reset, ←/esc to return)")
+		return b.String()
+	}
+
 	for i, field := range m.fields {
 		b.WriteString(field.title + ":\n")
 		b.WriteString(field.input.View())
@@ -15,6 +21,6 @@ func (m Model) View() string {
 		b.WriteRune('\n')
 	}
 
-	b.WriteString("\n(tab/shift+tab to navigate, ctrl+s to save, ←/esc to return)")
+	b.WriteString("\n(use ↑/↓ to navigate, ctrl+s to save, ←/esc to return)")
 	return b.String()
 }
