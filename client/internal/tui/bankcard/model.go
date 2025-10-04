@@ -1,6 +1,7 @@
 package bankcard
 
 import (
+	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/tui/common"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -13,14 +14,16 @@ type field struct {
 }
 
 type Model struct {
-	fields  []field
-	focused int
+	fields    []field
+	focused   int
+	saver     func(domain.BankCard) error
+	resultMsg string
 }
 
 func (m Model) Focused() int {
 	return m.focused
 }
-func New() Model {
+func New(saver func(domain.BankCard) error) Model {
 	return Model{
 		fields: []field{
 			{
@@ -39,7 +42,12 @@ func New() Model {
 				title: "CVC",
 				input: common.InputWithPlaceholder("123"),
 			},
+			{
+				title: "Note",
+				input: common.InputWithPlaceholder("Any additional information"),
+			},
 		},
+		saver: saver,
 	}
 }
 

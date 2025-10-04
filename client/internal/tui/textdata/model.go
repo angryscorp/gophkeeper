@@ -1,18 +1,22 @@
 package textdata
 
 import (
+	"gophkeeper/client/internal/domain"
+
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Model struct {
-	title   textinput.Model
-	content textarea.Model
-	focused int // 0 = title, 1 = content
+	title     textinput.Model
+	content   textarea.Model
+	focused   int // 0 = title, 1 = content
+	saver     func(domain.UserTextData) error
+	resultMsg string
 }
 
-func New() Model {
+func New(saver func(domain.UserTextData) error) Model {
 	title := textinput.New()
 	title.Placeholder = "Enter title..."
 	title.Width = len(title.Placeholder)
@@ -28,6 +32,7 @@ func New() Model {
 		title:   title,
 		content: content,
 		focused: 0,
+		saver:   saver,
 	}
 }
 

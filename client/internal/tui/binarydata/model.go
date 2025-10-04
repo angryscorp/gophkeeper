@@ -1,6 +1,7 @@
 package binarydata
 
 import (
+	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/tui/common"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -17,9 +18,11 @@ type Model struct {
 	focused    int
 	fileExists bool
 	fileSize   int64
+	saver      func(domain.UserBinaryData) error
+	resultMsg  string
 }
 
-func New() Model {
+func New(saver func(domain.UserBinaryData) error) Model {
 	return Model{
 		fields: []field{
 			{
@@ -31,6 +34,7 @@ func New() Model {
 				input: common.InputWithPlaceholder("File description"),
 			},
 		},
+		saver: saver,
 	}
 }
 

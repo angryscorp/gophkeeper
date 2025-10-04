@@ -1,10 +1,13 @@
 package binarydata
 
 import (
+	"errors"
+	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/tui/common"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/google/uuid"
 )
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -20,6 +23,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.focused = newVal
 			cmd := m.fields[m.focused].input.Focus()
 			return m, cmd
+		case "ctrl+s":
+			err := m.saveData()
+			if err != nil {
+				m.resultMsg = "Error saving data: " + err.Error()
+				return m, nil
+			}
+			m.resultMsg = "Data successfully saved"
+
+			// reset all fields
+			for i := 0; i < len(m.fields); i++ {
+				m.fields[i].input.Reset()
+				m.fields[m.focused].input.Blur()
+			}
+			m.focused = 0
+			return m, m.fields[m.focused].input.Focus()
+
+		case "enter", " ":
+			m.resultMsg = ""
+			return m, nil
 		}
 	}
 
@@ -43,4 +65,30 @@ func checkFilePath(filePath string) (fileExists bool, fileSize int64) {
 		return
 	}
 	return true, info.Size()
+}
+
+func (m Model) saveData() error {
+	for _, f := range m.fields {
+		if f.input.Value() == "" {
+			return errors.New(f.title + " is empty")
+		}
+	}
+
+	data, err := os.ReadFile(m.fields[0].input.Value())
+	if err != nil {
+		return err
+	}
+
+	binaryData := domain.UserBinaryData{
+		ID:   uuid.New(),
+		Data: data,
+		Note: m.fields[1].input.Value(),
+	}
+
+	err = m.saver(binaryData)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

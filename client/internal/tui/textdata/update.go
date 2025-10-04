@@ -1,6 +1,12 @@
 package textdata
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	"errors"
+	"gophkeeper/client/internal/domain"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/google/uuid"
+)
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
@@ -18,6 +24,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.content.Blur()
 				cmds = append(cmds, m.title.Focus())
 			}
+		case "ctrl+s":
+			err := m.saveData()
+			if err != nil {
+				m.resultMsg = "Error saving data: " + err.Error()
+				return m, nil
+			}
+			m.resultMsg = "Data successfully saved"
+
+			// reset all fields
+			m.title.Reset()
+			m.content.Reset()
+			m.content.Blur()
+			m.focused = 0
+
+			return m, m.title.Focus()
+
+		case "enter", " ":
+			if m.resultMsg != "" {
+				m.resultMsg = ""
+				return m, nil
+			}
 		}
 	}
 
@@ -31,4 +58,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
+}
+
+func (m Model) saveData() error {
+	if m.title.Value() == "" {
+		return errors.New("title cannot be empty")
+	}
+
+	if m.content.Value() == "" {
+		return errors.New("content cannot be empty")
+	}
+
+	bankCard := domain.UserTextData{
+		ID:   uuid.New(),
+		Data: m.title.Value(),
+		Note: m.content.Value(),
+	}
+
+	err := m.saver(bankCard)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
