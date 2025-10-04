@@ -2,14 +2,17 @@ package main
 
 import (
 	"gophkeeper/client/internal/config"
+	"gophkeeper/client/internal/crypto"
 	grpcauth "gophkeeper/client/internal/grpc/auth"
 	grpcsync "gophkeeper/client/internal/grpc/sync"
-	tokenrepo "gophkeeper/client/internal/repository/tokens/impl"
+	credsrepo "gophkeeper/client/internal/repository/records"
+	tokenrepo "gophkeeper/client/internal/repository/tokens"
 	"gophkeeper/client/internal/tui/menu"
 	"gophkeeper/client/internal/usecase/auth"
 	"gophkeeper/client/internal/usecase/save"
 	"gophkeeper/client/internal/usecase/sync"
 	"gophkeeper/pkg/buildinfo"
+	pkgcrypto "gophkeeper/pkg/crypto"
 	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -20,12 +23,17 @@ import (
 func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	var closeFuncs []func()
 
+	// Crypto proxy
+	cryptoProxy := crypto.New(pkgcrypto.Encrypt)
+
 	// Repositories initialization
-	repo, closeDB, err := tokenrepo.New(cfg.DBFileName)
+	tokensRepo, closeDB, err := tokenrepo.New(cfg.DBFileName)
 	if err != nil {
 		panic(err)
 	}
 	closeFuncs = append(closeFuncs, closeDB)
+
+	credsRepo := credsrepo.New(tokensRepo.Conn, cryptoProxy.Encrypt)
 
 	// gRPC client connection
 	conn, err := grpc.NewClient(
@@ -42,9 +50,9 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	syncClient := grpcsync.New(conn)
 
 	// Usecases
-	authUsecase := auth.New(authClient, repo)
-	syncUsecase := sync.New(syncClient, repo)
-	saveUsecase := save.UserInfoSaver{}
+	authUsecase := auth.New(authClient, tokensRepo, cryptoProxy.SetDataKey)
+	syncUsecase := sync.New(syncClient, tokensRepo)
+	saveUsecase := save.New(credsRepo)
 
 	// TUI
 	mainMenu := menu.New(

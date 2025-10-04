@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"fmt"
-	"gophkeeper/client/internal/repository/tokens"
 	"gophkeeper/pkg/crypto"
 	"gophkeeper/pkg/device"
 	"time"
@@ -20,18 +19,26 @@ type Client interface {
 	LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) (string, error)
 }
 
+type Tokens interface {
+	Unlock(dataKey []byte) error
+	SaveAccessToken(ctx context.Context, token string) error
+}
+
 type Auth struct {
-	client Client
-	repo   tokens.Tokens
+	client        Client
+	repo          Tokens
+	dataKeySetter func(dataKey []byte)
 }
 
 func New(
 	client Client,
-	repo tokens.Tokens,
+	repo Tokens,
+	dataKeySetter func(dataKey []byte),
 ) *Auth {
 	return &Auth{
-		client: client,
-		repo:   repo,
+		client:        client,
+		repo:          repo,
+		dataKeySetter: dataKeySetter,
 	}
 }
 
@@ -122,5 +129,7 @@ func (auth *Auth) Login(username, password string) error {
 		return err
 	}
 
+	auth.dataKeySetter(dataKey)
+	
 	return nil
 }

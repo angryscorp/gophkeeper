@@ -1,14 +1,40 @@
 package save
 
-import "gophkeeper/client/internal/domain"
+import (
+	"context"
+	"gophkeeper/client/internal/domain"
+	"time"
+)
+
+const (
+	ctxTimeout = 5 * time.Second
+)
+
+type CredentialsRepository interface {
+	Save(ctx context.Context, credentials domain.Credentials) error
+}
 
 type UserInfoSaver struct {
+	credentialsRepo CredentialsRepository
+}
+
+func New(credentialsRepo CredentialsRepository) *UserInfoSaver {
+	return &UserInfoSaver{
+		credentialsRepo: credentialsRepo,
+	}
 }
 
 var _ domain.UserInfoSaver = (*UserInfoSaver)(nil)
 
 func (u UserInfoSaver) SaveCredentials(credentials domain.Credentials) error {
-	//TODO implement me
+	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout*time.Second)
+	defer cancel()
+
+	err := u.credentialsRepo.Save(ctx, credentials)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

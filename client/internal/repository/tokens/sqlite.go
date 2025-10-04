@@ -1,4 +1,4 @@
-package impl
+package tokens
 
 import (
 	"context"
@@ -7,8 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"gophkeeper/client/internal/repository/migration"
-	"gophkeeper/client/internal/repository/tokens"
 	"gophkeeper/client/internal/repository/tokens/db"
+	"gophkeeper/client/internal/usecase/auth"
+	"gophkeeper/client/internal/usecase/sync"
 )
 
 type Tokens struct {
@@ -35,11 +36,28 @@ func New(dbFileName string) (*Tokens, func(), error) {
 	return t, closeFn, nil
 }
 
-var _ tokens.Tokens = (*Tokens)(nil)
+func (t *Tokens) Conn() (*sql.DB, error) {
+	if t.Ready() {
+		return t.db, nil
+	}
+
+	return nil, errors.New("connection not ready")
+}
+
+var _ sync.Tokens = (*Tokens)(nil)
 
 func (t *Tokens) Ready() bool {
 	return t.db != nil && t.queries != nil && t.closeDB != nil
 }
+
+func (t *Tokens) GetAccessToken(ctx context.Context) (string, error) {
+	if !t.Ready() {
+		return "", errors.New("db is not ready")
+	}
+	return t.queries.GetAccessToken(ctx)
+}
+
+var _ auth.Tokens = (*Tokens)(nil)
 
 func (t *Tokens) Unlock(dataKey []byte) error {
 	// If DB is already open, close it
@@ -72,13 +90,6 @@ func (t *Tokens) Unlock(dataKey []byte) error {
 	}
 
 	return nil
-}
-
-func (t *Tokens) GetAccessToken(ctx context.Context) (string, error) {
-	if !t.Ready() {
-		return "", errors.New("db is not ready")
-	}
-	return t.queries.GetAccessToken(ctx)
 }
 
 func (t *Tokens) SaveAccessToken(ctx context.Context, token string) error {

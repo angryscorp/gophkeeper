@@ -45,13 +45,13 @@ func New(
 				"📕 Register",
 				"Register new account",
 				routeRegister,
-				func(m *Model) tea.Cmd { m.reg = auth.New("REGISTER", regFactory); return m.reg.Init() },
+				func(m *Model) tea.Cmd { m.reg = auth.New("📕 Register new account", regFactory); return m.reg.Init() },
 			},
 			{
 				"🔑️ Login",
 				"Login to existing account",
 				routeAuth,
-				func(m *Model) tea.Cmd { m.auth = auth.New("LOGIN", loginFactory); return m.auth.Init() },
+				func(m *Model) tea.Cmd { m.auth = auth.New("🔑️ Login", loginFactory); return m.auth.Init() },
 			},
 			{
 				"📡 Sync",

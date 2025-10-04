@@ -3,7 +3,7 @@ package sync
 import "fmt"
 
 func (m Model) View() string {
-	title := "SYNCING"
+	title := "📡 SYNCING"
 	switch m.state {
 	case stateInProgress:
 		return fmt.Sprintf("%s\n\nsyncing...", title)

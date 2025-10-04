@@ -3,7 +3,6 @@ package sync
 import (
 	"context"
 	"errors"
-	"gophkeeper/client/internal/repository/tokens"
 	"time"
 )
 
@@ -15,14 +14,19 @@ type Client interface {
 	Ping(ctx context.Context, accessToken string) error
 }
 
+type Tokens interface {
+	GetAccessToken(ctx context.Context) (string, error)
+	Ready() bool
+}
+
 type Sync struct {
 	client Client
-	repo   tokens.Tokens
+	repo   Tokens
 }
 
 func New(
 	client Client,
-	repo tokens.Tokens,
+	repo Tokens,
 ) *Sync {
 	return &Sync{
 		client: client,
