@@ -36,7 +36,7 @@ func (r Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid.
 		r.queries = db.New(conn)
 	}
 
-	err := r.queries.Add(ctx, db.AddParams{
+	err := r.queries.AddRecord(ctx, db.AddRecordParams{
 		ID:            id.String(),
 		Kind:          int64(kind),
 		UpdatedAtUnix: time.Now().UnixMilli(),
@@ -61,7 +61,7 @@ func (r Repository) GetAll(ctx context.Context) ([]list.RawRecord, error) {
 		r.queries = db.New(conn)
 	}
 
-	rows, err := r.queries.Get(ctx)
+	rows, err := r.queries.GetRecords(ctx)
 	if err != nil {
 		return nil, err
 	}

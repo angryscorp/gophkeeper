@@ -47,3 +47,13 @@ sql:
         out: "./client/internal/repository/records/db"
         sql_package: "database/sql"
         omit_unused_structs: true
+
+  - engine: "sqlite"
+    queries: "./client/internal/repository/sync/queries"
+    schema: "./client/internal/repository/migration/migrations"
+    gen:
+      go:
+        package: "db"
+        out: "./client/internal/repository/sync/db"
+        sql_package: "database/sql"
+        omit_unused_structs: true
