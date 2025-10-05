@@ -18,6 +18,6 @@ func (c Credentials) ToRecord() Record {
 		ID:            c.ID,
 		Title:         c.Note,
 		Kind:          UserDataKindCredentials,
-		SensitiveInfo: fmt.Sprintf("Login: %s\nPassword: %s\n", c.Login, c.Password),
+		SensitiveInfo: fmt.Sprintf("Login: %s | Password: %s", c.Login, c.Password),
 	}
 }

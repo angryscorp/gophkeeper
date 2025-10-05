@@ -71,8 +71,8 @@ func (m Model) saveData() error {
 
 	bankCard := domain.UserTextData{
 		ID:   uuid.New(),
-		Data: m.title.Value(),
-		Note: m.content.Value(),
+		Data: m.content.Value(),
+		Note: m.title.Value(),
 	}
 
 	err := m.saver(bankCard)

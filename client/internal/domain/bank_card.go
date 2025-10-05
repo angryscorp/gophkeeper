@@ -20,6 +20,6 @@ func (b BankCard) ToRecord() Record {
 		ID:            b.ID,
 		Title:         b.Note,
 		Kind:          UserDataKindBankCard,
-		SensitiveInfo: fmt.Sprintf("Owner: %s\nNumber: %s\nCVV: %s\nExpireDate: %s\n", b.Owner, b.Number, b.CVV, b.ExpireDate),
+		SensitiveInfo: fmt.Sprintf("Owner: %s | Number: %s | CVV: %s | ExpireDate: %s", b.Owner, b.Number, b.CVV, b.ExpireDate),
 	}
 }

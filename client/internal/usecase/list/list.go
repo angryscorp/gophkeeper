@@ -12,7 +12,7 @@ type List struct {
 	decryptor func([]byte) ([]byte, error)
 }
 
-func NewList(
+func New(
 	repo Repository,
 	decryptor func([]byte) ([]byte, error),
 ) *List {

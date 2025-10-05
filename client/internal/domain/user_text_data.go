@@ -17,6 +17,6 @@ func (u UserTextData) ToRecord() Record {
 		ID:            u.ID,
 		Title:         u.Note,
 		Kind:          UserDataKindTextData,
-		SensitiveInfo: fmt.Sprintf("Data: %s\n", u.Data),
+		SensitiveInfo: fmt.Sprintf("Data: %s", u.Data),
 	}
 }

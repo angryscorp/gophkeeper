@@ -17,6 +17,6 @@ func (b UserBinaryData) ToRecord() Record {
 		ID:            b.ID,
 		Title:         b.Note,
 		Kind:          UserDataKindBinaryData,
-		SensitiveInfo: fmt.Sprintf("Data: %s\n", b.Data),
+		SensitiveInfo: fmt.Sprintf("Data: %s", b.Data),
 	}
 }
