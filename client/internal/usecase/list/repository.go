@@ -8,9 +8,9 @@ import (
 )
 
 type RawRecord struct {
-	Kind domain.UserDataKind
-	ID   uuid.UUID
-	Data []byte
+	ID      uuid.UUID
+	Kind    domain.UserDataKind
+	Payload []byte
 }
 
 type Repository interface {

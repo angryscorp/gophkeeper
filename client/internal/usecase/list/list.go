@@ -8,12 +8,17 @@ import (
 )
 
 type List struct {
-	repo Repository
+	repo      Repository
+	decryptor func([]byte) ([]byte, error)
 }
 
-func NewList(repo Repository) *List {
+func NewList(
+	repo Repository,
+	decryptor func([]byte) ([]byte, error),
+) *List {
 	return &List{
-		repo: repo,
+		repo:      repo,
+		decryptor: decryptor,
 	}
 }
 
@@ -25,7 +30,7 @@ func (l List) GetAllRecords() ([]domain.Record, error) {
 
 	result := make([]domain.Record, len(rows))
 	for i := range rows {
-		res, err := l.mapRecord(rows[i])
+		res, err := l.decryptRecord(rows[i])
 		if err != nil {
 			return nil, err
 		}
@@ -34,11 +39,16 @@ func (l List) GetAllRecords() ([]domain.Record, error) {
 	return result, nil
 }
 
-func (l List) mapRecord(record RawRecord) (*domain.Record, error) {
+func (l List) decryptRecord(record RawRecord) (*domain.Record, error) {
+	data, err := l.decryptor(record.Payload)
+	if err != nil {
+		return nil, err
+	}
+
 	switch record.Kind {
 	case domain.UserDataKindBankCard:
 		var bankCard domain.BankCard
-		err := json.Unmarshal(record.Data, &bankCard)
+		err := json.Unmarshal(data, &bankCard)
 		if err != nil {
 			return nil, err
 		}
@@ -47,7 +57,7 @@ func (l List) mapRecord(record RawRecord) (*domain.Record, error) {
 
 	case domain.UserDataKindCredentials:
 		var credentials domain.Credentials
-		err := json.Unmarshal(record.Data, &credentials)
+		err := json.Unmarshal(data, &credentials)
 		if err != nil {
 			return nil, err
 		}
@@ -56,7 +66,7 @@ func (l List) mapRecord(record RawRecord) (*domain.Record, error) {
 
 	case domain.UserDataKindTextData:
 		var textData domain.UserTextData
-		err := json.Unmarshal(record.Data, &textData)
+		err := json.Unmarshal(data, &textData)
 		if err != nil {
 			return nil, err
 		}
@@ -65,7 +75,7 @@ func (l List) mapRecord(record RawRecord) (*domain.Record, error) {
 
 	case domain.UserDataKindBinaryData:
 		var binaryData domain.UserBinaryData
-		err := json.Unmarshal(record.Data, &binaryData)
+		err := json.Unmarshal(data, &binaryData)
 		if err != nil {
 			return nil, err
 		}

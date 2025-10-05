@@ -24,7 +24,7 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	var closeFuncs []func()
 
 	// Crypto proxy
-	cryptoProxy := crypto.New(pkgcrypto.Encrypt)
+	cryptoProxy := crypto.New(pkgcrypto.Encrypt, pkgcrypto.Decrypt)
 
 	// Repositories initialization
 	tokensRepo, closeDB, err := tokenrepo.New(cfg.DBFileName)
@@ -50,7 +50,7 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	// Usecases
 	authUsecase := auth.New(authClient, tokensRepo, cryptoProxy.SetDataKey)
 	syncUsecase := sync.New(syncClient, tokensRepo)
-	saveUsecase := save.New(recordrepo.New(tokensRepo.Conn, cryptoProxy.Encrypt))
+	saveUsecase := save.New(recordrepo.New(tokensRepo.Conn), cryptoProxy.Encrypt)
 
 	// TUI
 	mainMenu := menu.New(

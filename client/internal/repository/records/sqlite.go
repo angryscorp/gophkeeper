@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/repository/records/db"
+	"gophkeeper/client/internal/usecase/list"
 	"gophkeeper/client/internal/usecase/save"
 	"time"
 
@@ -14,22 +15,19 @@ import (
 type Repository struct {
 	queries   *db.Queries
 	dbFactory func() (*sql.DB, error)
-	encryptor func(plaintext []byte) ([]byte, error)
 }
 
 func New(
 	dbFactory func() (*sql.DB, error),
-	encryptor func(plaintext []byte) ([]byte, error),
 ) *Repository {
 	return &Repository{
 		dbFactory: dbFactory,
-		encryptor: encryptor,
 	}
 }
 
 var _ save.Repository = (*Repository)(nil)
 
-func (r Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid.UUID, data []byte) error {
+func (r Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid.UUID, payload []byte) error {
 	if r.queries == nil {
 		conn, err := r.dbFactory()
 		if err != nil {
@@ -38,12 +36,7 @@ func (r Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid.
 		r.queries = db.New(conn)
 	}
 
-	payload, err := r.encryptor(data)
-	if err != nil {
-		return err
-	}
-
-	err = r.queries.Add(ctx, db.AddParams{
+	err := r.queries.Add(ctx, db.AddParams{
 		ID:            id.String(),
 		Kind:          int64(kind),
 		UpdatedAtUnix: time.Now().UnixMilli(),
@@ -55,4 +48,39 @@ func (r Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid.
 	}
 
 	return nil
+}
+
+var _ list.Repository = (*Repository)(nil)
+
+func (r Repository) GetAll(ctx context.Context) ([]list.RawRecord, error) {
+	if r.queries == nil {
+		conn, err := r.dbFactory()
+		if err != nil {
+			return nil, err
+		}
+		r.queries = db.New(conn)
+	}
+
+	rows, err := r.queries.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]list.RawRecord, 0)
+	for _, row := range rows {
+		id, err := uuid.Parse(row.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		record := list.RawRecord{
+			ID:      id,
+			Kind:    domain.UserDataKind(row.Kind),
+			Payload: row.Payload,
+		}
+
+		result = append(result, record)
+	}
+
+	return result, nil
 }

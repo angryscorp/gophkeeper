@@ -12,12 +12,17 @@ const (
 )
 
 type UserInfoSaver struct {
-	repo Repository
+	repo      Repository
+	encryptor func([]byte) ([]byte, error)
 }
 
-func New(repo Repository) *UserInfoSaver {
+func New(
+	repo Repository,
+	encryptor func([]byte) ([]byte, error),
+) *UserInfoSaver {
 	return &UserInfoSaver{
-		repo: repo,
+		repo:      repo,
+		encryptor: encryptor,
 	}
 }
 
@@ -32,7 +37,12 @@ func (u UserInfoSaver) SaveCredentials(credentials domain.Credentials) error {
 		return err
 	}
 
-	return u.repo.Save(ctx, domain.UserDataKindCredentials, credentials.ID, data)
+	payload, err := u.encryptor(data)
+	if err != nil {
+		return err
+	}
+
+	return u.repo.Save(ctx, domain.UserDataKindCredentials, credentials.ID, payload)
 }
 
 func (u UserInfoSaver) SaveBankCard(bankCard domain.BankCard) error {
@@ -44,7 +54,12 @@ func (u UserInfoSaver) SaveBankCard(bankCard domain.BankCard) error {
 		return err
 	}
 
-	return u.repo.Save(ctx, domain.UserDataKindBankCard, bankCard.ID, data)
+	payload, err := u.encryptor(data)
+	if err != nil {
+		return err
+	}
+
+	return u.repo.Save(ctx, domain.UserDataKindBankCard, bankCard.ID, payload)
 }
 
 func (u UserInfoSaver) SaveUserBinaryData(userBinaryData domain.UserBinaryData) error {
@@ -56,7 +71,12 @@ func (u UserInfoSaver) SaveUserBinaryData(userBinaryData domain.UserBinaryData) 
 		return err
 	}
 
-	return u.repo.Save(ctx, domain.UserDataKindBinaryData, userBinaryData.ID, data)
+	payload, err := u.encryptor(data)
+	if err != nil {
+		return err
+	}
+
+	return u.repo.Save(ctx, domain.UserDataKindBinaryData, userBinaryData.ID, payload)
 }
 
 func (u UserInfoSaver) SaveUserTextData(userTextData domain.UserTextData) error {
@@ -68,5 +88,10 @@ func (u UserInfoSaver) SaveUserTextData(userTextData domain.UserTextData) error 
 		return err
 	}
 
-	return u.repo.Save(ctx, domain.UserDataKindTextData, userTextData.ID, data)
+	payload, err := u.encryptor(data)
+	if err != nil {
+		return err
+	}
+
+	return u.repo.Save(ctx, domain.UserDataKindTextData, userTextData.ID, payload)
 }
