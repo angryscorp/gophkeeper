@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/google/uuid"
+import (
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 type BankCard struct {
 	ID         uuid.UUID
@@ -9,4 +13,13 @@ type BankCard struct {
 	CVV        string
 	ExpireDate string
 	Note       string
+}
+
+func (b BankCard) ToRecord() Record {
+	return Record{
+		ID:            b.ID,
+		Title:         b.Note,
+		Kind:          UserDataKindBankCard,
+		SensitiveInfo: fmt.Sprintf("Owner: %s\nNumber: %s\nCVV: %s\nExpireDate: %s\n", b.Owner, b.Number, b.CVV, b.ExpireDate),
+	}
 }

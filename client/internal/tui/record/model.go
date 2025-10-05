@@ -35,23 +35,23 @@ func New(dataSaver domain.UserInfoSaver) Model {
 		cursor: 0,
 		menuItems: []menuItem{
 			{
-				title:       "💳 Bank Card",
-				description: "Credit/Debit card information",
+				title:       domain.UserDataKindBankCard.Title(),
+				description: domain.UserDataKindBankCard.Description(),
 				route:       routeBankCardForm,
 			},
 			{
-				title:       "🔑 Credentials",
-				description: "Username and password",
+				title:       domain.UserDataKindCredentials.Title(),
+				description: domain.UserDataKindCredentials.Description(),
 				route:       routeCredentialsForm,
 			},
 			{
-				title:       "📝 Text Data",
-				description: "Notes and text information",
+				title:       domain.UserDataKindTextData.Title(),
+				description: domain.UserDataKindTextData.Description(),
 				route:       routeTextDataForm,
 			},
 			{
-				title:       "📁 Binary Data",
-				description: "Files and binary information",
+				title:       domain.UserDataKindBinaryData.Title(),
+				description: domain.UserDataKindBinaryData.Description(),
 				route:       routeBinaryDataForm,
 			},
 		},

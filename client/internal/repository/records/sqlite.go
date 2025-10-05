@@ -45,7 +45,7 @@ func (r Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid.
 
 	err = r.queries.Add(ctx, db.AddParams{
 		ID:            id.String(),
-		Kind:          kind,
+		Kind:          int64(kind),
 		UpdatedAtUnix: time.Now().UnixMilli(),
 		Payload:       payload,
 	})
