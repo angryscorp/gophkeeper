@@ -3,11 +3,12 @@ package records
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/repository/records/db"
 	"gophkeeper/client/internal/usecase/save"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Repository struct {
@@ -26,9 +27,9 @@ func New(
 	}
 }
 
-var _ save.CredentialsRepository = (*Repository)(nil)
+var _ save.Repository = (*Repository)(nil)
 
-func (r Repository) Save(ctx context.Context, credentials domain.Credentials) error {
+func (r Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid.UUID, data []byte) error {
 	if r.queries == nil {
 		conn, err := r.dbFactory()
 		if err != nil {
@@ -37,19 +38,14 @@ func (r Repository) Save(ctx context.Context, credentials domain.Credentials) er
 		r.queries = db.New(conn)
 	}
 
-	data, err := json.Marshal(credentials)
-	if err != nil {
-		return err
-	}
-
 	payload, err := r.encryptor(data)
 	if err != nil {
 		return err
 	}
 
 	err = r.queries.Add(ctx, db.AddParams{
-		ID:            credentials.ID.String(),
-		Kind:          domain.UserDataKindCredentials,
+		ID:            id.String(),
+		Kind:          kind,
 		UpdatedAtUnix: time.Now().UnixMilli(),
 		Payload:       payload,
 	})

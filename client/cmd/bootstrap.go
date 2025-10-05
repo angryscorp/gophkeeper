@@ -5,7 +5,7 @@ import (
 	"gophkeeper/client/internal/crypto"
 	grpcauth "gophkeeper/client/internal/grpc/auth"
 	grpcsync "gophkeeper/client/internal/grpc/sync"
-	credsrepo "gophkeeper/client/internal/repository/records"
+	recordrepo "gophkeeper/client/internal/repository/records"
 	tokenrepo "gophkeeper/client/internal/repository/tokens"
 	"gophkeeper/client/internal/tui/menu"
 	"gophkeeper/client/internal/usecase/auth"
@@ -33,8 +33,6 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	}
 	closeFuncs = append(closeFuncs, closeDB)
 
-	credsRepo := credsrepo.New(tokensRepo.Conn, cryptoProxy.Encrypt)
-
 	// gRPC client connection
 	conn, err := grpc.NewClient(
 		cfg.ServerAddr,
@@ -52,7 +50,7 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	// Usecases
 	authUsecase := auth.New(authClient, tokensRepo, cryptoProxy.SetDataKey)
 	syncUsecase := sync.New(syncClient, tokensRepo)
-	saveUsecase := save.New(credsRepo)
+	saveUsecase := save.New(recordrepo.New(tokensRepo.Conn, cryptoProxy.Encrypt))
 
 	// TUI
 	mainMenu := menu.New(

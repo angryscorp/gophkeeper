@@ -3,29 +3,23 @@ package auth
 import (
 	"context"
 	"crypto/hmac"
-	"errors"
 	"gophkeeper/pkg/crypto"
 	"gophkeeper/server/internal/domain"
-	"gophkeeper/server/internal/repository/challenges"
-	"gophkeeper/server/internal/repository/users"
 	"log"
 	"time"
 )
 
 const challengeVerificationAttempts = 3
 
-type TokenIssuer interface {
-	IssueAccess(userID, deviceID string) (string, error)
-}
 type Auth struct {
-	users       users.Users
-	challenges  challenges.Challenges
+	users       Users
+	challenges  Challenges
 	tokenIssuer TokenIssuer
 }
 
 func New(
-	users users.Users,
-	challenges challenges.Challenges,
+	users Users,
+	challenges Challenges,
 	tokenIssuer TokenIssuer,
 ) *Auth {
 	return &Auth{
@@ -66,7 +60,7 @@ func (auth *Auth) LoginFinish(ctx context.Context, username, deviceName string, 
 	log.Printf("Finishing login: %s\n", deviceName)
 
 	challengeIsCorrect := false
-	err := auth.challenges.GetForUpdate(ctx, username, deviceName, func(info challenges.ChallengeInfo) bool {
+	err := auth.challenges.GetForUpdate(ctx, username, deviceName, func(info ChallengeInfo) bool {
 		if info.Attempts >= challengeVerificationAttempts {
 			return false
 		}
@@ -79,7 +73,7 @@ func (auth *Auth) LoginFinish(ctx context.Context, username, deviceName string, 
 	}
 
 	if !challengeIsCorrect {
-		return "", errors.New("invalid challenge")
+		return "", domain.ErrChallengeFailed
 	}
 
 	token, err := auth.tokenIssuer.IssueAccess(username, deviceName)

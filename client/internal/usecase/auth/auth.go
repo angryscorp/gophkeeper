@@ -13,17 +13,6 @@ const (
 	ctxTimeout  = 5 * time.Second
 )
 
-type Client interface {
-	Register(ctx context.Context, username string, kdf crypto.KDFParameters, edKey, authKey []byte, algorithm crypto.AuthKeyAlgorithm) error
-	LoginStart(ctx context.Context, username string, deviceName string) (crypto.LoginPayload, error)
-	LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) (string, error)
-}
-
-type Tokens interface {
-	Unlock(dataKey []byte) error
-	SaveAccessToken(ctx context.Context, token string) error
-}
-
 type Auth struct {
 	client        Client
 	repo          Tokens
@@ -130,6 +119,6 @@ func (auth *Auth) Login(username, password string) error {
 	}
 
 	auth.dataKeySetter(dataKey)
-	
+
 	return nil
 }

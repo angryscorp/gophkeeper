@@ -1,7 +1,9 @@
 package domain
 
+type UserDataKind = int64
+
 const (
-	UserDataKindBankCard = iota + 1
+	UserDataKindBankCard UserDataKind = iota + 1
 	UserDataKindCredentials
 	UserDataKindTextData
 	UserDataKindBinaryData

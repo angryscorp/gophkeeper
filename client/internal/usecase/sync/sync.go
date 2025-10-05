@@ -10,15 +10,6 @@ const (
 	ctxTimeout = 5 * time.Second
 )
 
-type Client interface {
-	Ping(ctx context.Context, accessToken string) error
-}
-
-type Tokens interface {
-	GetAccessToken(ctx context.Context) (string, error)
-	Ready() bool
-}
-
 type Sync struct {
 	client Client
 	repo   Tokens

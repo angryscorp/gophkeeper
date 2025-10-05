@@ -1,14 +1,17 @@
-package impl
+package users
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"gophkeeper/pkg/crypto"
 	"gophkeeper/pkg/pgx"
 	"gophkeeper/server/internal/domain"
-	"gophkeeper/server/internal/repository/users"
 	"gophkeeper/server/internal/repository/users/db"
+	"gophkeeper/server/internal/usecase/auth"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -29,15 +32,18 @@ func New(dsn string) (*Users, func(), error) {
 	}, pool.Close, nil
 }
 
-var _ users.Users = (*Users)(nil)
+var _ auth.Users = (*Users)(nil)
 
-func (repo Users) Get(ctx context.Context, username string) (domain.User, error) {
+func (repo Users) Get(ctx context.Context, username string) (*domain.User, error) {
 	row, err := repo.queries.Get(ctx, username)
 	if err != nil {
-		return domain.User{}, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrUsernameNotFound
+		}
+		return nil, err
 	}
 
-	return domain.User{
+	return &domain.User{
 		ID:       row.ID,
 		Username: row.Username,
 		KDFParameters: crypto.KDFParameters{
@@ -54,7 +60,7 @@ func (repo Users) Get(ctx context.Context, username string) (domain.User, error)
 }
 
 func (repo Users) Add(ctx context.Context, user domain.User) error {
-	return repo.queries.Add(ctx, db.AddParams{
+	err := repo.queries.Add(ctx, db.AddParams{
 		ID:               user.ID,
 		Username:         user.Username,
 		KdfAlgorithm:     string(user.KDFParameters.Algorithm),
@@ -66,4 +72,17 @@ func (repo Users) Add(ctx context.Context, user domain.User) error {
 		AuthKey:          user.AuthKey,
 		AuthKeyAlgorithm: string(user.AuthKeyAlgorithm),
 	})
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			// duplicate key value violates unique constraint
+			if pgErr.Code == "23505" && pgErr.ConstraintName == "users_username_key" {
+				return domain.ErrUsernameTaken
+			}
+		}
+		return err
+	}
+
+	return nil
 }

@@ -1,4 +1,4 @@
-package challenges
+package auth
 
 import (
 	"context"
@@ -6,11 +6,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-)
-
-const (
-	ChallengeNotFound      = "challenge not found"
-	WrongChallengeResponse = "wrong challenge response"
 )
 
 type ChallengeInfo struct {

@@ -1,12 +1,15 @@
-package impl
+package challenges
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"gophkeeper/pkg/crypto"
 	pkgpgx "gophkeeper/pkg/pgx"
-	"gophkeeper/server/internal/repository/challenges"
+	"gophkeeper/server/internal/domain"
 	"gophkeeper/server/internal/repository/challenges/db"
+	"gophkeeper/server/internal/usecase/auth"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,7 +34,7 @@ func New(dsn string) (*Challenges, func(), error) {
 	}, pool.Close, nil
 }
 
-var _ challenges.Challenges = (*Challenges)(nil)
+var _ auth.Challenges = (*Challenges)(nil)
 
 func (c Challenges) Add(ctx context.Context, userId uuid.UUID, deviceName string, challenge []byte, expiresAt time.Time) error {
 	return c.queries.Add(ctx, db.AddParams{
@@ -43,7 +46,7 @@ func (c Challenges) Add(ctx context.Context, userId uuid.UUID, deviceName string
 	})
 }
 
-func (c Challenges) GetForUpdate(ctx context.Context, username, deviceName string, challengerValidator func(challenges.ChallengeInfo) bool) error {
+func (c Challenges) GetForUpdate(ctx context.Context, username, deviceName string, challengerValidator func(auth.ChallengeInfo) bool) error {
 	tx, err := c.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
@@ -57,10 +60,13 @@ func (c Challenges) GetForUpdate(ctx context.Context, username, deviceName strin
 
 	resp, err := qtx.GetForUpdate(ctx, db.GetForUpdateParams{Username: username, DeviceName: deviceName})
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrChallengeNotFound
+		}
 		return fmt.Errorf("failed to get challenge: %w", err)
 	}
 
-	info := challenges.ChallengeInfo{
+	info := auth.ChallengeInfo{
 		Challenge:        resp.Challenge,
 		Attempts:         resp.Attempts,
 		AuthKey:          resp.AuthKey,

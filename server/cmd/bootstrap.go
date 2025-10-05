@@ -6,8 +6,8 @@ import (
 	"gophkeeper/server/internal/config"
 	serverauth "gophkeeper/server/internal/grpc/auth"
 	serversync "gophkeeper/server/internal/grpc/sync"
-	challengesrepo "gophkeeper/server/internal/repository/challenges/impl"
-	usersrepo "gophkeeper/server/internal/repository/users/impl"
+	challengesrepo "gophkeeper/server/internal/repository/challenges"
+	usersrepo "gophkeeper/server/internal/repository/users"
 	"gophkeeper/server/internal/tokens"
 	"gophkeeper/server/internal/usecase/auth"
 	"log"
@@ -51,6 +51,7 @@ func bootstrap(cfg config.Config) (*grpc.Server, []func()) {
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			serversync.UnaryAuthForSync(verifier),
+			serverauth.ErrorMappingServerInterceptor(),
 		),
 	)
 	grpcauth.RegisterAuthServiceServer(
