@@ -85,10 +85,5 @@ func (c Challenges) GetForUpdate(ctx context.Context, username, deviceName strin
 		return fmt.Errorf("failed to update challenge: %w", err)
 	}
 
-	if err = tx.Commit(ctx); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
-	}
-
-	return nil
-
+	return tx.Commit(ctx)
 }

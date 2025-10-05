@@ -24,8 +24,27 @@ func (s Server) Pull(ctx context.Context, request *sync.PullRequest) (*sync.Pull
 }
 
 func (s Server) Push(ctx context.Context, request *sync.PushRequest) (*sync.PushResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	fmt.Println("push")
+	for i, rec := range request.Changes {
+		fmt.Printf("->rec %d; id: %s; kind: %d\n", i, rec.Id, rec.Kind)
+	}
+
+	// TODO: saving logic
+
+	if len(request.Changes) == 0 {
+		return &sync.PushResponse{
+			Results: []*sync.PushResult{},
+		}, nil
+	} else {
+		return &sync.PushResponse{
+			Results: []*sync.PushResult{
+				{
+					RecordId: request.Changes[0].OperationId,
+					Status:   1,
+				},
+			},
+		}, nil
+	}
 }
 
 func (s Server) Ping(ctx context.Context, empty *emptypb.Empty) (*emptypb.Empty, error) {

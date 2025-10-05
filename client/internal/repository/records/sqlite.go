@@ -14,6 +14,7 @@ import (
 
 type Repository struct {
 	queries   *db.Queries
+	conn      *sql.DB
 	dbFactory func() (*sql.DB, error)
 }
 
@@ -27,32 +28,51 @@ func New(
 
 var _ save.Repository = (*Repository)(nil)
 
-func (r Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid.UUID, payload []byte) error {
+func (r *Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid.UUID, payload []byte) error {
 	if r.queries == nil {
 		conn, err := r.dbFactory()
 		if err != nil {
 			return err
 		}
+		r.conn = conn
 		r.queries = db.New(conn)
 	}
 
-	err := r.queries.AddRecord(ctx, db.AddRecordParams{
+	tx, err := r.conn.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	qtx := r.queries.WithTx(tx)
+	updatedAt := time.Now().UTC().UnixMilli()
+
+	err = qtx.AddRecord(ctx, db.AddRecordParams{
 		ID:            id.String(),
 		Kind:          int64(kind),
-		UpdatedAtUnix: time.Now().UnixMilli(),
+		UpdatedAtUnix: updatedAt,
 		Payload:       payload,
+	})
+
+	err = qtx.EnqueueOutbox(ctx, db.EnqueueOutboxParams{
+		OperationID:   uuid.New().String(),
+		RecordID:      id.String(),
+		Kind:          int64(kind),
+		UpdatedAtUnix: updatedAt,
+		Payload:       payload,
+		CreatedAtUnix: time.Now().UTC().UnixMilli(),
 	})
 
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 var _ list.Repository = (*Repository)(nil)
 
-func (r Repository) GetAll(ctx context.Context) ([]list.RawRecord, error) {
+func (r *Repository) GetAll(ctx context.Context) ([]list.RawRecord, error) {
 	if r.queries == nil {
 		conn, err := r.dbFactory()
 		if err != nil {

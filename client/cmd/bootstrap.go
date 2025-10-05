@@ -6,6 +6,7 @@ import (
 	grpcauth "gophkeeper/client/internal/grpc/auth"
 	grpcsync "gophkeeper/client/internal/grpc/sync"
 	recordrepo "gophkeeper/client/internal/repository/records"
+	syncrepo "gophkeeper/client/internal/repository/sync"
 	tokenrepo "gophkeeper/client/internal/repository/tokens"
 	"gophkeeper/client/internal/tui/menu"
 	"gophkeeper/client/internal/usecase/auth"
@@ -50,7 +51,7 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 
 	// Usecases
 	authUsecase := auth.New(authClient, tokensRepo, cryptoProxy.SetDataKey)
-	syncUsecase := sync.New(syncClient, tokensRepo)
+	syncUsecase := sync.New(syncClient, tokensRepo, syncrepo.New(tokensRepo.Conn))
 	saveUsecase := save.New(recordrepo.New(tokensRepo.Conn), cryptoProxy.Encrypt)
 	listUsecase := list.New(recordrepo.New(tokensRepo.Conn), cryptoProxy.Decrypt)
 
@@ -59,7 +60,7 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 		RegFactory:   authUsecase.Register,
 		LoginFactory: authUsecase.Login,
 		DataSaver:    saveUsecase,
-		SyncFactory:  func() error { return syncUsecase.Ping() },
+		SyncFactory:  func() error { return syncUsecase.Push() },
 		DataFactory:  listUsecase.GetAllRecords,
 		HelpFactory:  buildinfo.New(Version, BuildTime).String,
 	}
