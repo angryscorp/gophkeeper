@@ -10,10 +10,10 @@ import (
 	tokenrepo "gophkeeper/client/internal/repository/tokens"
 	"gophkeeper/client/internal/tui/menu"
 	"gophkeeper/client/internal/usecase/auth"
+	"gophkeeper/client/internal/usecase/help"
 	"gophkeeper/client/internal/usecase/list"
 	"gophkeeper/client/internal/usecase/save"
 	"gophkeeper/client/internal/usecase/sync"
-	"gophkeeper/pkg/buildinfo"
 	pkgcrypto "gophkeeper/pkg/crypto"
 	"log"
 
@@ -54,15 +54,16 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 	syncUsecase := sync.New(syncClient, tokensRepo, syncrepo.New(tokensRepo.Conn))
 	saveUsecase := save.New(recordrepo.New(tokensRepo.Conn), cryptoProxy.Encrypt)
 	listUsecase := list.New(recordrepo.New(tokensRepo.Conn), cryptoProxy.Decrypt)
+	helpUsecase := help.New(Version, BuildTime)
 
 	// TUI
 	env := menu.Environment{
 		RegFactory:   authUsecase.Register,
 		LoginFactory: authUsecase.Login,
 		DataSaver:    saveUsecase,
-		SyncFactory:  func() error { return syncUsecase.Sync() },
+		SyncFactory:  syncUsecase.Sync,
 		DataFactory:  listUsecase.GetAllRecords,
-		HelpFactory:  buildinfo.New(Version, BuildTime).String,
+		HelpFactory:  helpUsecase.Help,
 	}
 	program := tea.NewProgram(menu.New(env), tea.WithAltScreen())
 	return program, closeFuncs
