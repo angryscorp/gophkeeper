@@ -53,6 +53,11 @@ func (s Server) Pull(ctx context.Context, request *sync.PullRequest) (*sync.Pull
 }
 
 func (s Server) Push(ctx context.Context, request *sync.PushRequest) (*sync.PushResponse, error) {
+	username, ok := UsernameFromCtx(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "no username in context")
+	}
+
 	records := make([]domain.Message, len(request.Changes))
 	for i, change := range request.Changes {
 		operationID, err := uuid.Parse(change.OperationId)
@@ -74,7 +79,7 @@ func (s Server) Push(ctx context.Context, request *sync.PushRequest) (*sync.Push
 		}
 	}
 
-	resp, err := s.usecase.Push(ctx, records)
+	resp, err := s.usecase.Push(ctx, username, records)
 	if err != nil {
 		return nil, err
 	}

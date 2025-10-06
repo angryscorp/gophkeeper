@@ -63,3 +63,34 @@ func (q *Queries) GetChanges(ctx context.Context, arg GetChangesParams) ([]GetCh
 	}
 	return items, nil
 }
+
+const insertChange = `-- name: InsertChange :exec
+WITH u AS (
+    SELECT id FROM users WHERE username = $1
+)
+INSERT INTO journal(user_id, id, kind, updated_at_unix, payload, operation_id)
+SELECT u.id, $2, $3, $4, $5, $6
+FROM u
+ON CONFLICT (user_id, operation_id) DO NOTHING
+`
+
+type InsertChangeParams struct {
+	Username      string
+	ID            uuid.UUID
+	Kind          int32
+	UpdatedAtUnix int64
+	Payload       []byte
+	OperationID   uuid.UUID
+}
+
+func (q *Queries) InsertChange(ctx context.Context, arg InsertChangeParams) error {
+	_, err := q.db.Exec(ctx, insertChange,
+		arg.Username,
+		arg.ID,
+		arg.Kind,
+		arg.UpdatedAtUnix,
+		arg.Payload,
+		arg.OperationID,
+	)
+	return err
+}

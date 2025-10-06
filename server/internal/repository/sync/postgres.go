@@ -3,11 +3,13 @@ package sync
 import (
 	"context"
 	"fmt"
-	"gophkeeper/pkg/pgx"
+	commonpgx "gophkeeper/pkg/pgx"
 	"gophkeeper/server/internal/domain"
 	"gophkeeper/server/internal/repository/sync/db"
 	"gophkeeper/server/internal/usecase/sync"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -17,7 +19,7 @@ type Sync struct {
 }
 
 func New(dsn string) (*Sync, func(), error) {
-	pool, err := pgx.CreatePGXPool(dsn)
+	pool, err := commonpgx.CreatePGXPool(dsn)
 	if err != nil {
 		return nil, func() {}, fmt.Errorf("failed to create pool: %w", err)
 	}
@@ -63,4 +65,42 @@ func (s Sync) GetChanges(ctx context.Context, username string, cursor int64, lim
 		NextCursor: nextCursor,
 		HasMore:    hasMore,
 	}, nil
+}
+
+func (s Sync) AddChanges(ctx context.Context, username string, changes []domain.Message) ([]uuid.UUID, error) {
+	tx, err := s.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+
+	defer func(tx pgx.Tx, ctx context.Context) {
+		_ = tx.Rollback(ctx)
+	}(tx, ctx)
+
+	qtx := s.queries.WithTx(tx)
+
+	res := make([]uuid.UUID, len(changes))
+	for i, change := range changes {
+		err := qtx.InsertChange(ctx, db.InsertChangeParams{
+			Username:      username,
+			ID:            change.RecordID,
+			Kind:          change.Kind,
+			UpdatedAtUnix: change.UpdatedAtUnix,
+			Payload:       change.Payload,
+			OperationID:   change.ID,
+		})
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to insert change: %w", err)
+		}
+
+		res[i] = change.ID
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return res, nil
 }
