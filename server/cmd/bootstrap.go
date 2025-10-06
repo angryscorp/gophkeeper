@@ -7,6 +7,7 @@ import (
 	serverauth "gophkeeper/server/internal/grpc/auth"
 	serversync "gophkeeper/server/internal/grpc/sync"
 	challengesrepo "gophkeeper/server/internal/repository/challenges"
+	syncrepo "gophkeeper/server/internal/repository/sync"
 	usersrepo "gophkeeper/server/internal/repository/users"
 	"gophkeeper/server/internal/tokens"
 	"gophkeeper/server/internal/usecase/auth"
@@ -42,6 +43,11 @@ func bootstrap(cfg config.Config) (*grpc.Server, []func()) {
 	}
 	closeFuncs = append(closeFuncs, closeDB)
 
+	repoSync, closeDB, err := syncrepo.New(cfg.DatabaseDSN)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	repoChallenges, closeDB, err := challengesrepo.New(cfg.DatabaseDSN)
 	if err != nil {
 		log.Fatal(err)
@@ -63,7 +69,7 @@ func bootstrap(cfg config.Config) (*grpc.Server, []func()) {
 	)
 	grpcsync.RegisterSyncServiceServer(
 		server,
-		serversync.New(sync.New()),
+		serversync.New(sync.New(repoSync)),
 	)
 
 	if cfg.Debug {

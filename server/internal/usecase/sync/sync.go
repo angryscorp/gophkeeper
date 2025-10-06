@@ -7,24 +7,16 @@ import (
 	"github.com/google/uuid"
 )
 
-type Sync struct{}
-
-func New() *Sync {
-	return &Sync{}
+type Sync struct {
+	repo Repository
 }
 
-type PullResponse struct {
-	Changes    []domain.Message
-	NextCursor int64
-	HasMore    bool
+func New(repo Repository) *Sync {
+	return &Sync{repo: repo}
 }
 
-func (s *Sync) Pull(ctx context.Context, cursor int64, limit int32) (*PullResponse, error) {
-	return &PullResponse{
-		Changes:    []domain.Message{},
-		NextCursor: 0,
-		HasMore:    false,
-	}, nil
+func (s *Sync) Pull(ctx context.Context, username string, cursor int64, limit int32) (*PullResponse, error) {
+	return s.repo.GetChanges(ctx, username, cursor, limit)
 }
 
 func (s *Sync) Push(ctx context.Context, changes []domain.Message) ([]uuid.UUID, error) {

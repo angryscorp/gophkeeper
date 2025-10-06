@@ -7,6 +7,8 @@ import (
 	usecaseSync "gophkeeper/server/internal/usecase/sync"
 
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -22,7 +24,12 @@ func New(usecase *usecaseSync.Sync) *Server {
 var _ sync.SyncServiceServer = (*Server)(nil)
 
 func (s Server) Pull(ctx context.Context, request *sync.PullRequest) (*sync.PullResponse, error) {
-	resp, err := s.usecase.Pull(ctx, request.Cursor, request.Limit)
+	username, ok := UsernameFromCtx(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "no username in context")
+	}
+
+	resp, err := s.usecase.Pull(ctx, username, request.Cursor, request.Limit)
 	if err != nil {
 		return nil, err
 	}

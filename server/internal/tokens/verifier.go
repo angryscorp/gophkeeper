@@ -17,7 +17,7 @@ func NewVerifier(publicKey ed25519.PublicKey, aud string) *Verifier {
 	return &Verifier{publicKey: publicKey, aud: aud}
 }
 
-func (v *Verifier) Verify(tokenStr string) error {
+func (v *Verifier) Verify(tokenStr string) (string, error) {
 	ac := &AccessClaims{}
 	token, err := jwt.ParseWithClaims(
 		tokenStr,
@@ -35,12 +35,12 @@ func (v *Verifier) Verify(tokenStr string) error {
 	)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if !token.Valid {
-		return errors.New("invalid token")
+		return "", errors.New("invalid token")
 	}
 
-	return nil
+	return token.Claims.GetSubject()
 }
