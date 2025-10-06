@@ -14,11 +14,6 @@ message RecordChange {
   string operation_id = 5;     // UUID (idempotency)
 }
 
-message ChangeEnvelope {
-  int64 cursor = 1; // server_seq
-  RecordChange change = 2;
-}
-
 // Requires Authorization: Bearer <access_token>
 service SyncService {
   rpc Pull(PullRequest) returns (PullResponse);
@@ -32,7 +27,7 @@ message PullRequest {
 }
 
 message PullResponse {
-  repeated ChangeEnvelope changes = 1;
+  repeated RecordChange changes = 1;
   int64 next_cursor = 2;
   bool has_more = 3;
 }

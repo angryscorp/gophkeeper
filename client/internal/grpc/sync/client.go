@@ -41,12 +41,12 @@ func (c Client) Pull(ctx context.Context, accessToken string, cursor int64) (*us
 
 	res := make([]domain.Message, len(resp.Changes))
 	for i, change := range resp.Changes {
-		operationID, err := uuid.Parse(change.Change.OperationId)
+		operationID, err := uuid.Parse(change.OperationId)
 		if err != nil {
 			return nil, err
 		}
 
-		recordID, err := uuid.Parse(change.Change.Id)
+		recordID, err := uuid.Parse(change.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -54,9 +54,9 @@ func (c Client) Pull(ctx context.Context, accessToken string, cursor int64) (*us
 		res[i] = domain.Message{
 			ID:            operationID,
 			RecordID:      recordID,
-			Kind:          change.Change.Kind,
-			UpdatedAtUnix: change.Change.UpdatedAtUnix,
-			Payload:       change.Change.Payload,
+			Kind:          change.Kind,
+			UpdatedAtUnix: change.UpdatedAtUnix,
+			Payload:       change.Payload,
 		}
 	}
 

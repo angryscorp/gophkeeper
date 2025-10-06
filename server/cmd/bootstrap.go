@@ -10,6 +10,7 @@ import (
 	usersrepo "gophkeeper/server/internal/repository/users"
 	"gophkeeper/server/internal/tokens"
 	"gophkeeper/server/internal/usecase/auth"
+	"gophkeeper/server/internal/usecase/sync"
 	"log"
 
 	"google.golang.org/grpc"
@@ -62,7 +63,7 @@ func bootstrap(cfg config.Config) (*grpc.Server, []func()) {
 	)
 	grpcsync.RegisterSyncServiceServer(
 		server,
-		serversync.New(),
+		serversync.New(sync.New()),
 	)
 
 	if cfg.Debug {

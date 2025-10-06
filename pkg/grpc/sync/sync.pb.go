@@ -147,58 +147,6 @@ func (x *RecordChange) GetOperationId() string {
 	return ""
 }
 
-type ChangeEnvelope struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Cursor        int64                  `protobuf:"varint,1,opt,name=cursor,proto3" json:"cursor,omitempty"` // server_seq
-	Change        *RecordChange          `protobuf:"bytes,2,opt,name=change,proto3" json:"change,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ChangeEnvelope) Reset() {
-	*x = ChangeEnvelope{}
-	mi := &file_sync_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ChangeEnvelope) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ChangeEnvelope) ProtoMessage() {}
-
-func (x *ChangeEnvelope) ProtoReflect() protoreflect.Message {
-	mi := &file_sync_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ChangeEnvelope.ProtoReflect.Descriptor instead.
-func (*ChangeEnvelope) Descriptor() ([]byte, []int) {
-	return file_sync_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *ChangeEnvelope) GetCursor() int64 {
-	if x != nil {
-		return x.Cursor
-	}
-	return 0
-}
-
-func (x *ChangeEnvelope) GetChange() *RecordChange {
-	if x != nil {
-		return x.Change
-	}
-	return nil
-}
-
 type PullRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Cursor        int64                  `protobuf:"varint,1,opt,name=cursor,proto3" json:"cursor,omitempty"` // server_seq
@@ -209,7 +157,7 @@ type PullRequest struct {
 
 func (x *PullRequest) Reset() {
 	*x = PullRequest{}
-	mi := &file_sync_proto_msgTypes[2]
+	mi := &file_sync_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -221,7 +169,7 @@ func (x *PullRequest) String() string {
 func (*PullRequest) ProtoMessage() {}
 
 func (x *PullRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sync_proto_msgTypes[2]
+	mi := &file_sync_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -234,7 +182,7 @@ func (x *PullRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PullRequest.ProtoReflect.Descriptor instead.
 func (*PullRequest) Descriptor() ([]byte, []int) {
-	return file_sync_proto_rawDescGZIP(), []int{2}
+	return file_sync_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *PullRequest) GetCursor() int64 {
@@ -253,7 +201,7 @@ func (x *PullRequest) GetLimit() int32 {
 
 type PullResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Changes       []*ChangeEnvelope      `protobuf:"bytes,1,rep,name=changes,proto3" json:"changes,omitempty"`
+	Changes       []*RecordChange        `protobuf:"bytes,1,rep,name=changes,proto3" json:"changes,omitempty"`
 	NextCursor    int64                  `protobuf:"varint,2,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"`
 	HasMore       bool                   `protobuf:"varint,3,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -262,7 +210,7 @@ type PullResponse struct {
 
 func (x *PullResponse) Reset() {
 	*x = PullResponse{}
-	mi := &file_sync_proto_msgTypes[3]
+	mi := &file_sync_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -274,7 +222,7 @@ func (x *PullResponse) String() string {
 func (*PullResponse) ProtoMessage() {}
 
 func (x *PullResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sync_proto_msgTypes[3]
+	mi := &file_sync_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -287,10 +235,10 @@ func (x *PullResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PullResponse.ProtoReflect.Descriptor instead.
 func (*PullResponse) Descriptor() ([]byte, []int) {
-	return file_sync_proto_rawDescGZIP(), []int{3}
+	return file_sync_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *PullResponse) GetChanges() []*ChangeEnvelope {
+func (x *PullResponse) GetChanges() []*RecordChange {
 	if x != nil {
 		return x.Changes
 	}
@@ -320,7 +268,7 @@ type PushRequest struct {
 
 func (x *PushRequest) Reset() {
 	*x = PushRequest{}
-	mi := &file_sync_proto_msgTypes[4]
+	mi := &file_sync_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -332,7 +280,7 @@ func (x *PushRequest) String() string {
 func (*PushRequest) ProtoMessage() {}
 
 func (x *PushRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sync_proto_msgTypes[4]
+	mi := &file_sync_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -345,7 +293,7 @@ func (x *PushRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PushRequest.ProtoReflect.Descriptor instead.
 func (*PushRequest) Descriptor() ([]byte, []int) {
-	return file_sync_proto_rawDescGZIP(), []int{4}
+	return file_sync_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *PushRequest) GetChanges() []*RecordChange {
@@ -364,7 +312,7 @@ type PushResponse struct {
 
 func (x *PushResponse) Reset() {
 	*x = PushResponse{}
-	mi := &file_sync_proto_msgTypes[5]
+	mi := &file_sync_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -376,7 +324,7 @@ func (x *PushResponse) String() string {
 func (*PushResponse) ProtoMessage() {}
 
 func (x *PushResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sync_proto_msgTypes[5]
+	mi := &file_sync_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -389,7 +337,7 @@ func (x *PushResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PushResponse.ProtoReflect.Descriptor instead.
 func (*PushResponse) Descriptor() ([]byte, []int) {
-	return file_sync_proto_rawDescGZIP(), []int{5}
+	return file_sync_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *PushResponse) GetResults() []*PushResult {
@@ -409,7 +357,7 @@ type PushResult struct {
 
 func (x *PushResult) Reset() {
 	*x = PushResult{}
-	mi := &file_sync_proto_msgTypes[6]
+	mi := &file_sync_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -421,7 +369,7 @@ func (x *PushResult) String() string {
 func (*PushResult) ProtoMessage() {}
 
 func (x *PushResult) ProtoReflect() protoreflect.Message {
-	mi := &file_sync_proto_msgTypes[6]
+	mi := &file_sync_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -434,7 +382,7 @@ func (x *PushResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PushResult.ProtoReflect.Descriptor instead.
 func (*PushResult) Descriptor() ([]byte, []int) {
-	return file_sync_proto_rawDescGZIP(), []int{6}
+	return file_sync_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *PushResult) GetRecordId() string {
@@ -462,15 +410,12 @@ const file_sync_proto_rawDesc = "" +
 	"\x04kind\x18\x02 \x01(\x05R\x04kind\x12&\n" +
 	"\x0fupdated_at_unix\x18\x03 \x01(\x03R\rupdatedAtUnix\x12\x18\n" +
 	"\apayload\x18\x04 \x01(\fR\apayload\x12!\n" +
-	"\foperation_id\x18\x05 \x01(\tR\voperationId\"]\n" +
-	"\x0eChangeEnvelope\x12\x16\n" +
-	"\x06cursor\x18\x01 \x01(\x03R\x06cursor\x123\n" +
-	"\x06change\x18\x02 \x01(\v2\x1b.gophkeeper.v1.RecordChangeR\x06change\";\n" +
+	"\foperation_id\x18\x05 \x01(\tR\voperationId\";\n" +
 	"\vPullRequest\x12\x16\n" +
 	"\x06cursor\x18\x01 \x01(\x03R\x06cursor\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"\x83\x01\n" +
-	"\fPullResponse\x127\n" +
-	"\achanges\x18\x01 \x03(\v2\x1d.gophkeeper.v1.ChangeEnvelopeR\achanges\x12\x1f\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"\x81\x01\n" +
+	"\fPullResponse\x125\n" +
+	"\achanges\x18\x01 \x03(\v2\x1b.gophkeeper.v1.RecordChangeR\achanges\x12\x1f\n" +
 	"\vnext_cursor\x18\x02 \x01(\x03R\n" +
 	"nextCursor\x12\x19\n" +
 	"\bhas_more\x18\x03 \x01(\bR\ahasMore\"D\n" +
@@ -505,35 +450,33 @@ func file_sync_proto_rawDescGZIP() []byte {
 }
 
 var file_sync_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_sync_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_sync_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_sync_proto_goTypes = []any{
-	(PushStatus)(0),        // 0: gophkeeper.v1.PushStatus
-	(*RecordChange)(nil),   // 1: gophkeeper.v1.RecordChange
-	(*ChangeEnvelope)(nil), // 2: gophkeeper.v1.ChangeEnvelope
-	(*PullRequest)(nil),    // 3: gophkeeper.v1.PullRequest
-	(*PullResponse)(nil),   // 4: gophkeeper.v1.PullResponse
-	(*PushRequest)(nil),    // 5: gophkeeper.v1.PushRequest
-	(*PushResponse)(nil),   // 6: gophkeeper.v1.PushResponse
-	(*PushResult)(nil),     // 7: gophkeeper.v1.PushResult
-	(*emptypb.Empty)(nil),  // 8: google.protobuf.Empty
+	(PushStatus)(0),       // 0: gophkeeper.v1.PushStatus
+	(*RecordChange)(nil),  // 1: gophkeeper.v1.RecordChange
+	(*PullRequest)(nil),   // 2: gophkeeper.v1.PullRequest
+	(*PullResponse)(nil),  // 3: gophkeeper.v1.PullResponse
+	(*PushRequest)(nil),   // 4: gophkeeper.v1.PushRequest
+	(*PushResponse)(nil),  // 5: gophkeeper.v1.PushResponse
+	(*PushResult)(nil),    // 6: gophkeeper.v1.PushResult
+	(*emptypb.Empty)(nil), // 7: google.protobuf.Empty
 }
 var file_sync_proto_depIdxs = []int32{
-	1, // 0: gophkeeper.v1.ChangeEnvelope.change:type_name -> gophkeeper.v1.RecordChange
-	2, // 1: gophkeeper.v1.PullResponse.changes:type_name -> gophkeeper.v1.ChangeEnvelope
-	1, // 2: gophkeeper.v1.PushRequest.changes:type_name -> gophkeeper.v1.RecordChange
-	7, // 3: gophkeeper.v1.PushResponse.results:type_name -> gophkeeper.v1.PushResult
-	0, // 4: gophkeeper.v1.PushResult.status:type_name -> gophkeeper.v1.PushStatus
-	3, // 5: gophkeeper.v1.SyncService.Pull:input_type -> gophkeeper.v1.PullRequest
-	5, // 6: gophkeeper.v1.SyncService.Push:input_type -> gophkeeper.v1.PushRequest
-	8, // 7: gophkeeper.v1.SyncService.Ping:input_type -> google.protobuf.Empty
-	4, // 8: gophkeeper.v1.SyncService.Pull:output_type -> gophkeeper.v1.PullResponse
-	6, // 9: gophkeeper.v1.SyncService.Push:output_type -> gophkeeper.v1.PushResponse
-	8, // 10: gophkeeper.v1.SyncService.Ping:output_type -> google.protobuf.Empty
-	8, // [8:11] is the sub-list for method output_type
-	5, // [5:8] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	1, // 0: gophkeeper.v1.PullResponse.changes:type_name -> gophkeeper.v1.RecordChange
+	1, // 1: gophkeeper.v1.PushRequest.changes:type_name -> gophkeeper.v1.RecordChange
+	6, // 2: gophkeeper.v1.PushResponse.results:type_name -> gophkeeper.v1.PushResult
+	0, // 3: gophkeeper.v1.PushResult.status:type_name -> gophkeeper.v1.PushStatus
+	2, // 4: gophkeeper.v1.SyncService.Pull:input_type -> gophkeeper.v1.PullRequest
+	4, // 5: gophkeeper.v1.SyncService.Push:input_type -> gophkeeper.v1.PushRequest
+	7, // 6: gophkeeper.v1.SyncService.Ping:input_type -> google.protobuf.Empty
+	3, // 7: gophkeeper.v1.SyncService.Pull:output_type -> gophkeeper.v1.PullResponse
+	5, // 8: gophkeeper.v1.SyncService.Push:output_type -> gophkeeper.v1.PushResponse
+	7, // 9: gophkeeper.v1.SyncService.Ping:output_type -> google.protobuf.Empty
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_sync_proto_init() }
@@ -547,7 +490,7 @@ func file_sync_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sync_proto_rawDesc), len(file_sync_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   7,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
