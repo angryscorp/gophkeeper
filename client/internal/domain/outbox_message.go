@@ -2,7 +2,7 @@ package domain
 
 import "github.com/google/uuid"
 
-type OutboxMessage struct {
+type Message struct {
 	ID            uuid.UUID
 	RecordID      uuid.UUID
 	Kind          int32

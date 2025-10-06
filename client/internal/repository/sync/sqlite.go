@@ -3,6 +3,7 @@ package sync
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/usecase/sync"
 
@@ -25,9 +26,9 @@ func New(
 	}
 }
 
-var _ sync.OutboxRepository = (*Repository)(nil)
+var _ sync.Repository = (*Repository)(nil)
 
-func (r *Repository) GetBatch(ctx context.Context, limit int64) ([]domain.OutboxMessage, error) {
+func (r *Repository) GetBatch(ctx context.Context, limit int64) ([]domain.Message, error) {
 	if r.queries == nil {
 		conn, err := r.dbFactory()
 		if err != nil {
@@ -42,7 +43,7 @@ func (r *Repository) GetBatch(ctx context.Context, limit int64) ([]domain.Outbox
 		return nil, err
 	}
 
-	messages := make([]domain.OutboxMessage, len(res))
+	messages := make([]domain.Message, len(res))
 	for i, r := range res {
 		operationID, err := uuid.Parse(r.OperationID)
 		if err != nil {
@@ -54,7 +55,7 @@ func (r *Repository) GetBatch(ctx context.Context, limit int64) ([]domain.Outbox
 			return nil, err
 		}
 
-		messages[i] = domain.OutboxMessage{
+		messages[i] = domain.Message{
 			ID:            operationID,
 			RecordID:      recordID,
 			Kind:          int32(r.Kind),
@@ -89,6 +90,66 @@ func (r *Repository) DeleteBatch(ctx context.Context, ids []uuid.UUID) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return tx.Commit()
+}
+
+func (r *Repository) GetCursor(ctx context.Context) (int64, error) {
+	if r.queries == nil {
+		conn, err := r.dbFactory()
+		if err != nil {
+			return 0, err
+		}
+		r.conn = conn
+		r.queries = db.New(conn)
+	}
+
+	return r.queries.GetCursor(ctx)
+}
+
+func (r *Repository) SaveChanges(ctx context.Context, changes []domain.Message, newCursor int64) error {
+	if r.queries == nil {
+		conn, err := r.dbFactory()
+		if err != nil {
+			return err
+		}
+		r.conn = conn
+		r.queries = db.New(conn)
+	}
+
+	tx, err := r.conn.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	qtx := r.queries.WithTx(tx)
+
+	for _, change := range changes {
+		localUpdated, err := qtx.GetRecordMeta(ctx, change.RecordID.String())
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+		
+		if localUpdated > change.UpdatedAtUnix {
+			continue
+		}
+
+		err = qtx.UpsertRecord(ctx, db.UpsertRecordParams{
+			ID:            change.RecordID.String(),
+			Kind:          int64(change.Kind),
+			UpdatedAtUnix: change.UpdatedAtUnix,
+			Payload:       change.Payload,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	err = qtx.SetCursor(ctx, newCursor)
+	if err != nil {
+		return err
 	}
 
 	return tx.Commit()

@@ -19,8 +19,8 @@ func New() *Server {
 var _ sync.SyncServiceServer = (*Server)(nil)
 
 func (s Server) Pull(ctx context.Context, request *sync.PullRequest) (*sync.PullResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	fmt.Printf("pull: %v\n", request)
+	return &sync.PullResponse{}, nil
 }
 
 func (s Server) Push(ctx context.Context, request *sync.PushRequest) (*sync.PushResponse, error) {

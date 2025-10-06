@@ -13,6 +13,8 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+const pullBatchSize = 100
+
 type Client struct {
 	client sync.SyncServiceClient
 }
@@ -29,7 +31,39 @@ func (c Client) Ping(ctx context.Context, accessToken string) error {
 	return err
 }
 
-func (c Client) Push(ctx context.Context, accessToken string, messages []domain.OutboxMessage) ([]uuid.UUID, error) {
+func (c Client) Pull(ctx context.Context, accessToken string, cursor int64) (*usecase.PullResponse, error) {
+	ctx = addTokenToContext(ctx, accessToken)
+	req := &sync.PullRequest{Cursor: cursor, Limit: pullBatchSize}
+	resp, err := c.client.Pull(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]domain.Message, len(resp.Changes))
+	for i, change := range resp.Changes {
+		operationID, err := uuid.Parse(change.Change.OperationId)
+		if err != nil {
+			return nil, err
+		}
+
+		recordID, err := uuid.Parse(change.Change.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		res[i] = domain.Message{
+			ID:            operationID,
+			RecordID:      recordID,
+			Kind:          change.Change.Kind,
+			UpdatedAtUnix: change.Change.UpdatedAtUnix,
+			Payload:       change.Change.Payload,
+		}
+	}
+
+	return &usecase.PullResponse{Changes: res, NewCursor: resp.NextCursor, HasMore: resp.HasMore}, nil
+}
+
+func (c Client) Push(ctx context.Context, accessToken string, messages []domain.Message) ([]uuid.UUID, error) {
 	ctx = addTokenToContext(ctx, accessToken)
 
 	changes := make([]*sync.RecordChange, len(messages))

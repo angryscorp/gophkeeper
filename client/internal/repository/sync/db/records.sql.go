@@ -9,6 +9,17 @@ import (
 	"context"
 )
 
+const getRecordMeta = `-- name: GetRecordMeta :one
+SELECT updated_at_unix FROM records WHERE id = ?
+`
+
+func (q *Queries) GetRecordMeta(ctx context.Context, id string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getRecordMeta, id)
+	var updated_at_unix int64
+	err := row.Scan(&updated_at_unix)
+	return updated_at_unix, err
+}
+
 const upsertRecord = `-- name: UpsertRecord :exec
 INSERT INTO records (id, kind, updated_at_unix, payload)
 VALUES (?, ?, ?, ?)

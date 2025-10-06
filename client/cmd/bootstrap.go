@@ -60,7 +60,7 @@ func bootstrap(cfg config.Config) (*tea.Program, []func()) {
 		RegFactory:   authUsecase.Register,
 		LoginFactory: authUsecase.Login,
 		DataSaver:    saveUsecase,
-		SyncFactory:  func() error { return syncUsecase.Push() },
+		SyncFactory:  func() error { return syncUsecase.Sync() },
 		DataFactory:  listUsecase.GetAllRecords,
 		HelpFactory:  buildinfo.New(Version, BuildTime).String,
 	}
