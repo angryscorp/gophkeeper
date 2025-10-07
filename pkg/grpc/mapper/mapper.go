@@ -5,6 +5,7 @@ import (
 	"gophkeeper/pkg/grpc/auth"
 )
 
+// KdfParametersToDomain converts gRPC KdfParams into domain KDFParameters.
 func KdfParametersToDomain(kdf *auth.KdfParams) crypto.KDFParameters {
 	return crypto.KDFParameters{
 		Algorithm:   kdfAlgoToDomain(kdf.Alg),
@@ -15,6 +16,7 @@ func KdfParametersToDomain(kdf *auth.KdfParams) crypto.KDFParameters {
 	}
 }
 
+// KdfParametersToGRPC converts domain KDFParameters into gRPC KdfParams.
 func KdfParametersToGRPC(kdf crypto.KDFParameters) *auth.KdfParams {
 	return &auth.KdfParams{
 		Alg:         kdfAlgoToGRPC(kdf.Algorithm),
@@ -43,6 +45,7 @@ func kdfAlgoToGRPC(algorithm crypto.KDFAlgorithm) auth.KdfAlg {
 	}
 }
 
+// AuthAlgoToDomain converts gRPC AuthKeyAlg into domain AuthKeyAlgorithm.
 func AuthAlgoToDomain(algorithm auth.AuthKeyAlg) crypto.AuthKeyAlgorithm {
 	switch algorithm {
 	case auth.AuthKeyAlg_HMAC_SHA256:
@@ -54,6 +57,7 @@ func AuthAlgoToDomain(algorithm auth.AuthKeyAlg) crypto.AuthKeyAlgorithm {
 	}
 }
 
+// AuthAlgoToGRPC converts domain AuthKeyAlgorithm into gRPC AuthKeyAlg.
 func AuthAlgoToGRPC(algorithm crypto.AuthKeyAlgorithm) auth.AuthKeyAlg {
 	switch algorithm {
 	case crypto.AuthKeyAlgorithmHMACSHA256:

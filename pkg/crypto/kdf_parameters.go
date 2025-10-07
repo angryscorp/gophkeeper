@@ -12,6 +12,7 @@ type KDFParameters struct {
 // KDFAlgorithm represents the KDF algorithm used to derive a key from a password.
 type KDFAlgorithm string
 
+// KDFAlgorithmARGON2ID uses the Argon2id algorithm.
 const KDFAlgorithmARGON2ID KDFAlgorithm = "ARGON2ID"
 
 // DefaultKDFParameters returns the default KDF parameters.
