@@ -13,10 +13,14 @@ import (
 
 const prefixSyncService = "/gophkeeper.v1.SyncService/"
 
+// TokenVerifier validates an access token and returns the associated username.
 type TokenVerifier interface {
 	Verify(token string) (string, error)
 }
 
+// UnaryAuthForSync is a gRPC interceptor that enforces Bearer token
+// authentication for SyncService methods only. It injects the verified
+// username into the request context.
 func UnaryAuthForSync(verifier TokenVerifier) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		if !strings.HasPrefix(info.FullMethod, prefixSyncService) {

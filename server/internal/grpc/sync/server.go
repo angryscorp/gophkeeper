@@ -12,19 +12,23 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+// Server implements the gRPC SyncServiceServer and
+// adapts the sync use case to gRPC transport.
 type Server struct {
 	sync.UnimplementedSyncServiceServer
 	usecase *usecaseSync.Sync
 }
 
+// New creates a new Sync gRPC server bound to the given use case.
 func New(usecase *usecaseSync.Sync) *Server {
 	return &Server{usecase: usecase}
 }
 
 var _ sync.SyncServiceServer = (*Server)(nil)
 
+// Pull returns a batch of changes for the given username starting from the cursor.
 func (s Server) Pull(ctx context.Context, request *sync.PullRequest) (*sync.PullResponse, error) {
-	username, ok := UsernameFromCtx(ctx)
+	username, ok := usernameFromCtx(ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "no username in context")
 	}
@@ -52,8 +56,9 @@ func (s Server) Pull(ctx context.Context, request *sync.PullRequest) (*sync.Pull
 	}, nil
 }
 
+// Push stores a batch of changes from the client and returns per-record results.
 func (s Server) Push(ctx context.Context, request *sync.PushRequest) (*sync.PushResponse, error) {
-	username, ok := UsernameFromCtx(ctx)
+	username, ok := usernameFromCtx(ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "no username in context")
 	}
@@ -95,6 +100,7 @@ func (s Server) Push(ctx context.Context, request *sync.PushRequest) (*sync.Push
 	return &sync.PushResponse{Results: res}, nil
 }
 
+// Ping is a simple liveness check.
 func (s Server) Ping(ctx context.Context, empty *emptypb.Empty) (*emptypb.Empty, error) {
 	return &emptypb.Empty{}, nil
 }

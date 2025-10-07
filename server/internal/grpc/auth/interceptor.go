@@ -10,6 +10,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// ErrorMappingServerInterceptor is a gRPC interceptor that maps
+// domain-level errors into appropriate gRPC status codes.
 func ErrorMappingServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,

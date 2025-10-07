@@ -17,11 +17,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// Challenges provides access to the login challenge storage (PostgreSQL) and
+// exposes methods to create and atomically validate challenges.
 type Challenges struct {
 	queries *db.Queries
 	pool    *pgxpool.Pool
 }
 
+// New initializes a Challenges repository backed by a pgx connection pool.
 func New(dsn string) (*Challenges, func(), error) {
 	pool, err := pkgpgx.CreatePGXPool(dsn)
 	if err != nil {
@@ -36,6 +39,8 @@ func New(dsn string) (*Challenges, func(), error) {
 
 var _ auth.Challenges = (*Challenges)(nil)
 
+// Add persists a new challenge for a given user/device with an expiration time.
+// The challenge bytes are stored as-is; no validation is performed here.
 func (c Challenges) Add(ctx context.Context, userId uuid.UUID, deviceName string, challenge []byte, expiresAt time.Time) error {
 	return c.queries.Add(ctx, db.AddParams{
 		UserID:     userId,
@@ -46,6 +51,10 @@ func (c Challenges) Add(ctx context.Context, userId uuid.UUID, deviceName string
 	})
 }
 
+// GetForUpdate loads the latest challenge for the given username/device in a
+// transaction with row-level locking, invokes challengerValidator to verify it,
+// and atomically marks the attempt as success or failure. On success it commits
+// the transaction; on failure it returns an appropriate error.
 func (c Challenges) GetForUpdate(ctx context.Context, username, deviceName string, challengerValidator func(auth.ChallengeInfo) bool) error {
 	tx, err := c.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {

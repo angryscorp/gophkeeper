@@ -11,12 +11,16 @@ import (
 
 const challengeVerificationAttempts = 3
 
+// Auth coordinates registration and login flows.
+// It reads users, manages HMAC-based login challenges, and issues access tokens.
 type Auth struct {
 	users       Users
 	challenges  Challenges
 	tokenIssuer TokenIssuer
 }
 
+// New constructs an Auth service with repositories for users and challenges
+// and a token issuer used to mint access tokens after successful login.
 func New(
 	users Users,
 	challenges Challenges,
@@ -29,11 +33,17 @@ func New(
 	}
 }
 
+// Register creates a new user account in the repository.
+// Returns an error if the username is already taken or persistence fails.
 func (auth *Auth) Register(ctx context.Context, user domain.User) error {
 	log.Printf("Registering user: %s\n", user.Username)
 	return auth.users.Add(ctx, user)
 }
 
+// LoginStart begins the login flow for the given user/device.
+// It loads the user's KDF and encrypted data key, generates a short challenge,
+// stores it server-side with expiry, and returns the payload needed by the client
+// to derive keys and compute the HMAC response.
 func (auth *Auth) LoginStart(ctx context.Context, username, deviceId string) (crypto.LoginPayload, error) {
 	log.Printf("Starting login for user: %s\n", username)
 	resp, err := auth.users.Get(ctx, username)
@@ -56,6 +66,8 @@ func (auth *Auth) LoginStart(ctx context.Context, username, deviceId string) (cr
 	}, nil
 }
 
+// LoginFinish completes the login by verifying the client's HMAC over the challenge.
+// On success it issues and returns a signed access token; otherwise an error is returned.
 func (auth *Auth) LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) (string, error) {
 	log.Printf("Finishing login: %s\n", deviceName)
 

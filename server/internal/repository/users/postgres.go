@@ -15,11 +15,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// Users is a repository that loads and stores user records in PostgreSQL.
 type Users struct {
 	queries *db.Queries
 	pool    *pgxpool.Pool
 }
 
+// New creates a Users repository backed by a pgx pool created from DSN.
 func New(dsn string) (*Users, func(), error) {
 	pool, err := pgx.CreatePGXPool(dsn)
 	if err != nil {
@@ -34,6 +36,8 @@ func New(dsn string) (*Users, func(), error) {
 
 var _ auth.Users = (*Users)(nil)
 
+// Get fetches a user by username. It returns domain.ErrUsernameNotFound
+// if no user exists with the given username.
 func (repo Users) Get(ctx context.Context, username string) (*domain.User, error) {
 	row, err := repo.queries.Get(ctx, username)
 	if err != nil {
@@ -59,6 +63,8 @@ func (repo Users) Get(ctx context.Context, username string) (*domain.User, error
 	}, nil
 }
 
+// Add inserts a new user. If the username already exists, it returns
+// domain.ErrUsernameTaken (mapped from unique constraint violation).
 func (repo Users) Add(ctx context.Context, user domain.User) error {
 	err := repo.queries.Add(ctx, db.AddParams{
 		ID:               user.ID,

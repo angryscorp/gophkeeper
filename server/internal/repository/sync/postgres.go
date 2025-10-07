@@ -13,11 +13,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// Sync is a repository implementation for synchronizing changes
+// between clients and server. It persists and fetches records
+// using PostgreSQL.
 type Sync struct {
 	queries *db.Queries
 	pool    *pgxpool.Pool
 }
 
+// New initializes the Sync repository with a pgx pool from the given DSN.
 func New(dsn string) (*Sync, func(), error) {
 	pool, err := commonpgx.CreatePGXPool(dsn)
 	if err != nil {
@@ -32,6 +36,8 @@ func New(dsn string) (*Sync, func(), error) {
 
 var _ sync.Repository = (*Sync)(nil)
 
+// GetChanges returns a batch of changes for a user after the given cursor.
+// It enforces a page size (limit) and indicates if more data is available.
 func (s Sync) GetChanges(ctx context.Context, username string, cursor int64, limit int32) (*sync.PullResponse, error) {
 	rows, err := s.queries.GetChanges(ctx, db.GetChangesParams{
 		Username:  username,
@@ -67,6 +73,8 @@ func (s Sync) GetChanges(ctx context.Context, username string, cursor int64, lim
 	}, nil
 }
 
+// AddChanges stores a batch of changes for a user in a transaction.
+// It returns the operation IDs of successfully persisted changes.
 func (s Sync) AddChanges(ctx context.Context, username string, changes []domain.Message) ([]uuid.UUID, error) {
 	tx, err := s.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {

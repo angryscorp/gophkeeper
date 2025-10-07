@@ -12,6 +12,8 @@ import (
 //go:embed migrations/*
 var embedMigrations embed.FS
 
+// MigratePostgres runs all embedded migrations against a PostgreSQL database
+// specified by the given DSN. It uses goose with the "postgres" dialect.
 func MigratePostgres(dsn string) error {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
