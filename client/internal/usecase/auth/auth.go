@@ -3,9 +3,10 @@ package auth
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"gophkeeper/pkg/crypto"
 	"gophkeeper/pkg/device"
-	"time"
 )
 
 const (

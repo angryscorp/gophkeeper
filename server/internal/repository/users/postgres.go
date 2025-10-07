@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"gophkeeper/pkg/crypto"
 	"gophkeeper/pkg/pgx"
 	"gophkeeper/server/internal/domain"
@@ -78,7 +79,6 @@ func (repo Users) Add(ctx context.Context, user domain.User) error {
 		AuthKey:          user.AuthKey,
 		AuthKeyAlgorithm: string(user.AuthKeyAlgorithm),
 	})
-
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {

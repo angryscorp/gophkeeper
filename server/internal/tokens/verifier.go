@@ -38,7 +38,6 @@ func (v *Verifier) Verify(tokenStr string) (string, error) {
 		jwt.WithIssuedAt(),
 		jwt.WithExpirationRequired(),
 	)
-
 	if err != nil {
 		return "", err
 	}

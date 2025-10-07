@@ -2,8 +2,9 @@ package auth
 
 import (
 	"context"
-	"gophkeeper/pkg/crypto"
 	"time"
+
+	"gophkeeper/pkg/crypto"
 
 	"github.com/google/uuid"
 )

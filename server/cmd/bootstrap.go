@@ -2,6 +2,8 @@ package main
 
 import (
 	"crypto/tls"
+	"log"
+
 	grpcauth "gophkeeper/pkg/grpc/auth"
 	grpcsync "gophkeeper/pkg/grpc/sync"
 	"gophkeeper/server/internal/config"
@@ -13,7 +15,6 @@ import (
 	"gophkeeper/server/internal/tokens"
 	"gophkeeper/server/internal/usecase/auth"
 	"gophkeeper/server/internal/usecase/sync"
-	"log"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

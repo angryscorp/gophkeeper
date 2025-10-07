@@ -3,6 +3,7 @@ package sync
 import (
 	"context"
 	"errors"
+
 	"gophkeeper/client/internal/domain"
 	usecase "gophkeeper/client/internal/usecase/sync"
 	"gophkeeper/pkg/grpc/sync"

@@ -38,7 +38,6 @@ func TestSigner_IssueAccess(t *testing.T) {
 				token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
 					return pubKey, nil
 				})
-
 				if err != nil {
 					t.Fatalf("failed to parse token: %v", err)
 				}

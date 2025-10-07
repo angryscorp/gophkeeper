@@ -3,11 +3,12 @@ package records
 import (
 	"context"
 	"database/sql"
+	"time"
+
 	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/repository/records/db"
 	"gophkeeper/client/internal/usecase/list"
 	"gophkeeper/client/internal/usecase/save"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -72,7 +73,6 @@ func (r *Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid
 		Payload:       payload,
 		CreatedAtUnix: time.Now().UTC().UnixMilli(),
 	})
-
 	if err != nil {
 		return err
 	}

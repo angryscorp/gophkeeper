@@ -5,12 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
+
 	"gophkeeper/pkg/crypto"
 	pkgpgx "gophkeeper/pkg/pgx"
 	"gophkeeper/server/internal/domain"
 	"gophkeeper/server/internal/repository/challenges/db"
 	"gophkeeper/server/internal/usecase/auth"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"

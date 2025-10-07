@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+
 	"gophkeeper/pkg/grpc/auth"
 	"gophkeeper/pkg/grpc/mapper"
 	usecaseAuth "gophkeeper/server/internal/usecase/auth"

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+
 	"gophkeeper/client/internal/domain"
 	"gophkeeper/pkg/crypto"
 	"gophkeeper/pkg/grpc/auth"

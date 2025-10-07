@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
 	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/usecase/sync"
 

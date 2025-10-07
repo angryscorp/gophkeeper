@@ -3,6 +3,7 @@ package sync
 import (
 	"context"
 	"fmt"
+
 	commonpgx "gophkeeper/pkg/pgx"
 	"gophkeeper/server/internal/domain"
 	"gophkeeper/server/internal/repository/sync/db"
@@ -97,7 +98,6 @@ func (s Sync) AddChanges(ctx context.Context, username string, changes []domain.
 			Payload:       change.Payload,
 			OperationID:   change.ID,
 		})
-
 		if err != nil {
 			return nil, fmt.Errorf("failed to insert change: %w", err)
 		}

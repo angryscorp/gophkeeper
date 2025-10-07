@@ -3,8 +3,9 @@ package auth
 import (
 	"context"
 	"errors"
-	"gophkeeper/server/internal/domain"
 	"testing"
+
+	"gophkeeper/server/internal/domain"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

@@ -3,10 +3,11 @@ package auth
 import (
 	"context"
 	"crypto/hmac"
-	"gophkeeper/pkg/crypto"
-	"gophkeeper/server/internal/domain"
 	"log"
 	"time"
+
+	"gophkeeper/pkg/crypto"
+	"gophkeeper/server/internal/domain"
 )
 
 const challengeVerificationAttempts = 3

@@ -1,10 +1,11 @@
 package mapper_test
 
 import (
-	"gophkeeper/pkg/grpc/auth"
-	"gophkeeper/pkg/grpc/mapper"
 	"reflect"
 	"testing"
+
+	"gophkeeper/pkg/grpc/auth"
+	"gophkeeper/pkg/grpc/mapper"
 )
 
 func TestKdfParameters_RoundTrip(t *testing.T) {

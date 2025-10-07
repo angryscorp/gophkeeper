@@ -2,6 +2,7 @@ package credentials
 
 import (
 	"errors"
+
 	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/tui/common"
 

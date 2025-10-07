@@ -2,6 +2,7 @@ package textdata
 
 import (
 	"errors"
+
 	"gophkeeper/client/internal/domain"
 
 	tea "github.com/charmbracelet/bubbletea"

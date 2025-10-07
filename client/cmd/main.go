@@ -1,9 +1,10 @@
 package main
 
 import (
-	"gophkeeper/client/internal/config"
 	"log"
 	"os"
+
+	"gophkeeper/client/internal/config"
 
 	_ "github.com/mutecomm/go-sqlcipher/v4"
 )

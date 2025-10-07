@@ -2,6 +2,8 @@ package main
 
 import (
 	"crypto/tls"
+	"log"
+
 	"gophkeeper/client/internal/config"
 	"gophkeeper/client/internal/crypto"
 	grpcauth "gophkeeper/client/internal/grpc/auth"
@@ -16,7 +18,6 @@ import (
 	"gophkeeper/client/internal/usecase/save"
 	"gophkeeper/client/internal/usecase/sync"
 	pkgcrypto "gophkeeper/pkg/crypto"
-	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"google.golang.org/grpc"

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+
 	"gophkeeper/server/internal/domain"
 )
 

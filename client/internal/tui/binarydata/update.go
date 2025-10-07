@@ -2,9 +2,10 @@ package binarydata
 
 import (
 	"errors"
+	"os"
+
 	"gophkeeper/client/internal/domain"
 	"gophkeeper/client/internal/tui/common"
-	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/google/uuid"
@@ -61,11 +62,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func checkFilePath(filePath string) (fileExists bool, fileSize int64) {
 	if filePath == "" {
-		return
+		return fileExists, fileSize
 	}
 	info, err := os.Stat(filePath)
 	if err != nil || info.IsDir() {
-		return
+		return fileExists, fileSize
 	}
 	return true, info.Size()
 }

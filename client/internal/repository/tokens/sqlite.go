@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+
 	"gophkeeper/client/internal/repository/migration"
 	"gophkeeper/client/internal/repository/tokens/db"
 	"gophkeeper/client/internal/usecase/auth"
