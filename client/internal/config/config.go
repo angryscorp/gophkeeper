@@ -11,6 +11,7 @@ type Config struct {
 	DBFileName      string `json:"db_file_name"`
 	BusyTimeoutInMs int    `json:"busy_timeout_in_ms"`
 	ServerAddr      string `json:"server_addr"`
+	ServerName      string `json:"server_name"`
 	Debug           bool   `json:"debug"`
 }
 

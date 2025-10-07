@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	grpcauth "gophkeeper/pkg/grpc/auth"
 	grpcsync "gophkeeper/pkg/grpc/sync"
 	"gophkeeper/server/internal/config"
@@ -15,6 +16,7 @@ import (
 	"log"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -55,12 +57,26 @@ func bootstrap(cfg config.Config) (*grpc.Server, []func()) {
 	closeFuncs = append(closeFuncs, closeDB)
 
 	// gRPC server initialization
-	server := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(
-			serversync.UnaryAuthForSync(verifier),
-			serverauth.ErrorMappingServerInterceptor(),
-		),
-	)
+	var options []grpc.ServerOption
+	if !cfg.Debug {
+		cert, err := tls.LoadX509KeyPair(cfg.TLSCertPath, cfg.TLSCKeyPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tlsCfg := &tls.Config{
+			MinVersion:   tls.VersionTLS13,
+			Certificates: []tls.Certificate{cert},
+			NextProtos:   []string{"h2"},
+		}
+		options = append(options, grpc.Creds(credentials.NewTLS(tlsCfg)))
+	}
+
+	options = append(options, grpc.ChainUnaryInterceptor(
+		serversync.UnaryAuthForSync(verifier),
+		serverauth.ErrorMappingServerInterceptor(),
+	))
+
+	server := grpc.NewServer(options...)
 	grpcauth.RegisterAuthServiceServer(
 		server,
 		serverauth.New(

@@ -12,6 +12,8 @@ type Config struct {
 	Debug          bool   `env:"DEBUG"`
 	PrivateKeyPath string `env:"PRIVATE_KEY_PATH"`
 	PublicKeyPath  string `env:"PUBLIC_KEY_PATH"`
+	TLSCertPath    string `env:"TLS_CERT_PATH"`
+	TLSCKeyPath    string `env:"TLS_KEY_PATH"`
 }
 
 func LoadFromEnv() (Config, error) {
