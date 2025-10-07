@@ -44,7 +44,7 @@ func UnaryAuthForSync(verifier TokenVerifier) grpc.UnaryServerInterceptor {
 			return nil, status.Error(codes.Unauthenticated, "invalid token")
 		}
 
-		ctx = context.WithValue(ctx, ctxKeyUsername{}, username)
+		ctx = contextWithUsername(ctx, username)
 		return handler(ctx, req)
 	}
 }
