@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+// View implements tea.Model. It renders the binary data form UI,
+// showing the file path input, file existence/size status, description
+// input, and context-sensitive instructions at the bottom.
 func (m Model) View() string {
 	var b strings.Builder
 	b.WriteString("📁 Binary Data\n\n")

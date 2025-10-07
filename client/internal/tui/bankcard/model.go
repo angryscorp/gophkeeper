@@ -13,6 +13,8 @@ type field struct {
 	input textinput.Model
 }
 
+// Model is a Bubble Tea model for collecting bank card details
+// from the user in a multi-field TUI form.
 type Model struct {
 	fields    []field
 	focused   int
@@ -20,9 +22,8 @@ type Model struct {
 	resultMsg string
 }
 
-func (m Model) Focused() int {
-	return m.focused
-}
+// New creates a new bank card form model with default placeholders
+// and a saver callback to persist the collected card data.
 func New(saver func(domain.BankCard) error) Model {
 	return Model{
 		fields: []field{
@@ -51,6 +52,7 @@ func New(saver func(domain.BankCard) error) Model {
 	}
 }
 
+// Init implements tea.Model. It sets the initial focus to the first field.
 func (m Model) Init() tea.Cmd {
 	return m.fields[0].input.Focus()
 }

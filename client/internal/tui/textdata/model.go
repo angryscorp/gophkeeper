@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Model is a Bubble Tea model for creating and saving text records.
 type Model struct {
 	title     textinput.Model
 	content   textarea.Model
@@ -16,6 +17,7 @@ type Model struct {
 	resultMsg string
 }
 
+// New creates a textdata form with title and multi-line content inputs.
 func New(saver func(domain.UserTextData) error) Model {
 	title := textinput.New()
 	title.Placeholder = "Enter title..."
@@ -36,6 +38,7 @@ func New(saver func(domain.UserTextData) error) Model {
 	}
 }
 
+// Init sets up initial commands (blinking cursors for inputs).
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(textinput.Blink, textarea.Blink)
 }

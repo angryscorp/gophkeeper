@@ -16,6 +16,10 @@ type menuItem struct {
 	route       recordRoute
 }
 
+// Model is a Bubble Tea model for creating new records.
+// It starts with a type-selection menu and routes into
+// one of the data entry forms (bank card, credentials,
+// text data, binary data).
 type Model struct {
 	route     recordRoute
 	cursor    int
@@ -29,6 +33,9 @@ type Model struct {
 	dataSaver domain.UserInfoSaver
 }
 
+// New creates a new record creation Model, wiring it
+// with the provided data saver and initializing the
+// menu of available record types.
 func New(dataSaver domain.UserInfoSaver) Model {
 	return Model{
 		route:  routeTypeSelection,
@@ -59,6 +66,7 @@ func New(dataSaver domain.UserInfoSaver) Model {
 	}
 }
 
+// Init implements tea.Model. It performs no initialization.
 func (m Model) Init() tea.Cmd {
 	return nil
 }

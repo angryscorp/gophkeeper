@@ -2,11 +2,15 @@ package help
 
 import "gophkeeper/pkg/buildinfo"
 
+// Help provides static help text combined with build info
+// (version and build time) for the GophKeeper client.
 type Help struct {
 	version   string
 	buildTime string
 }
 
+// New creates a new Help provider with the given version
+// and build time values.
 func New(version, buildTime string) *Help {
 	return &Help{
 		version:   version,
@@ -14,6 +18,8 @@ func New(version, buildTime string) *Help {
 	}
 }
 
+// Help returns the formatted help text including application
+// description, usage instructions, and build information.
 func (h *Help) Help() string {
 	return str + buildinfo.New(h.version, h.buildTime).String() + footer
 }

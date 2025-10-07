@@ -17,6 +17,9 @@ type menuItem struct {
 	init        func(*Model) tea.Cmd
 }
 
+// Model is the root Bubble Tea model that manages the main
+// application menu. It holds sub-models for registration,
+// login, sync, data listing, record editing, and help screens.
 type Model struct {
 	route  route
 	items  []menuItem
@@ -30,6 +33,10 @@ type Model struct {
 	help   help.Model
 }
 
+// New creates a new root menu Model with all menu items
+// initialized. Each menu item is associated with a route
+// and a factory function that constructs the corresponding
+// sub-model.
 func New(env Environment) Model {
 	return Model{
 		route: routeMenu,
@@ -84,6 +91,8 @@ func New(env Environment) Model {
 	}
 }
 
+// Init implements tea.Model. It does not perform any initialization
+// because the menu is immediately ready to render.
 func (m Model) Init() tea.Cmd {
 	return nil
 }

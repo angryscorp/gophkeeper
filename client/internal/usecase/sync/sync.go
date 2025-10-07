@@ -11,12 +11,17 @@ const (
 	batchLimit = 100
 )
 
+// Sync orchestrates bidirectional synchronization between the local store
+// (tokens/sync repository) and the remote gRPC service (client).
+// It handles ping/auth check, pull (apply server changes), and push (flush outbox).
 type Sync struct {
 	client    Client
 	tokenRepo Tokens
 	syncRepo  Repository
 }
 
+// New creates a Sync use case with the provided remote client, token storage
+// and local synchronization repository.
 func New(
 	client Client,
 	tokenRepo Tokens,
@@ -29,6 +34,8 @@ func New(
 	}
 }
 
+// Ping verifies the current session by calling the server's Ping method
+// with the stored access token.
 func (sync *Sync) Ping() error {
 	if !sync.tokenRepo.Ready() {
 		return errors.New("no active login session")
@@ -45,6 +52,10 @@ func (sync *Sync) Ping() error {
 	return sync.client.Ping(ctx, token)
 }
 
+// Sync performs a full round:
+//  1. Ping (auth check)
+//  2. Pull (apply server changes)
+//  3. Push (send local outbox)
 func (sync *Sync) Sync() error {
 	err := sync.Ping()
 	if err != nil {
@@ -64,6 +75,8 @@ func (sync *Sync) Sync() error {
 	return nil
 }
 
+// Pull fetches server changes page-by-page starting from the local cursor,
+// applies them to the local store, and advances the cursor until exhausted.
 func (sync *Sync) Pull() error {
 	if !sync.tokenRepo.Ready() {
 		return errors.New("no active login session")
@@ -101,6 +114,8 @@ func (sync *Sync) Pull() error {
 	return nil
 }
 
+// Push drains the local outbox in batches and sends them to the server.
+// Successfully applied messages are removed from the outbox.
 func (sync *Sync) Push() error {
 	if !sync.tokenRepo.Ready() {
 		return errors.New("no active login session")

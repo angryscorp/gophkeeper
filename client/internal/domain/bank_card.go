@@ -6,6 +6,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// BankCard represents sensitive payment card information
+// stored securely in the vault.
 type BankCard struct {
 	ID         uuid.UUID
 	Owner      string
@@ -15,6 +17,7 @@ type BankCard struct {
 	Note       string
 }
 
+// ToRecord converts a BankCard into a generic Record representation.
 func (b BankCard) ToRecord() Record {
 	return Record{
 		ID:            b.ID,

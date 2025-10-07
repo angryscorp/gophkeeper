@@ -2,6 +2,10 @@ package record
 
 import "fmt"
 
+// View implements tea.Model for the record creation screen.
+// It renders either the type selection menu or the currently
+// active form (bank card, credentials, text, or binary data)
+// depending on the current route.
 func (m Model) View() string {
 	switch m.route {
 	case routeTypeSelection:

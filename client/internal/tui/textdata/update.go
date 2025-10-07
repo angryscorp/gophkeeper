@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// Update handles keyboard input and routes it to the focused field (title or content).
+// It also supports focus switching (tab/shift+tab) and saving (ctrl+s).
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	switch msg := msg.(type) {

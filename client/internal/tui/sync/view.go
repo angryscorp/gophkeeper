@@ -2,6 +2,7 @@ package sync
 
 import "fmt"
 
+// View renders the sync screen based on the current state.
 func (m Model) View() string {
 	title := "📡 SYNCING"
 	footer := "\n(use ←/esc to return)"

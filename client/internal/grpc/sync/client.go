@@ -15,22 +15,32 @@ import (
 
 const pullBatchSize = 100
 
+// Client is a wrapper around the gRPC SyncServiceClient.
+// It provides higher-level methods for synchronization:
+// Ping, Pull and Push, mapping gRPC messages to domain models.
 type Client struct {
 	client sync.SyncServiceClient
 }
 
+// New creates a new Sync client bound to the given gRPC connection.
 func New(conn *grpc.ClientConn) *Client {
 	return &Client{client: sync.NewSyncServiceClient(conn)}
 }
 
 var _ usecase.Client = (*Client)(nil)
 
+// Ping calls the SyncService.Ping RPC to verify that the server
+// is reachable and the provided access token is valid.
 func (c Client) Ping(ctx context.Context, accessToken string) error {
 	ctx = addTokenToContext(ctx, accessToken)
 	_, err := c.client.Ping(ctx, &emptypb.Empty{})
 	return err
 }
 
+// Pull calls the SyncService.Pull RPC to fetch batched changes
+// from the server starting after the given cursor. It returns
+// the list of messages, the updated cursor, and whether more
+// changes are available.
 func (c Client) Pull(ctx context.Context, accessToken string, cursor int64) (*usecase.PullResponse, error) {
 	ctx = addTokenToContext(ctx, accessToken)
 	req := &sync.PullRequest{Cursor: cursor, Limit: pullBatchSize}
@@ -63,6 +73,9 @@ func (c Client) Pull(ctx context.Context, accessToken string, cursor int64) (*us
 	return &usecase.PullResponse{Changes: res, NewCursor: resp.NextCursor, HasMore: resp.HasMore}, nil
 }
 
+// Push calls the SyncService.Push RPC to upload local changes
+// to the server. It returns the list of record IDs that were
+// successfully applied or acknowledged.
 func (c Client) Push(ctx context.Context, accessToken string, messages []domain.Message) ([]uuid.UUID, error) {
 	ctx = addTokenToContext(ctx, accessToken)
 
@@ -99,6 +112,8 @@ func (c Client) Push(ctx context.Context, accessToken string, messages []domain.
 	return res, err
 }
 
+// addTokenToContext attaches a bearer access token into
+// the gRPC outgoing context metadata for authorization.
 func addTokenToContext(ctx context.Context, token string) context.Context {
 	return metadata.AppendToOutgoingContext(
 		ctx,

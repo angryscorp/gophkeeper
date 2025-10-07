@@ -10,6 +10,9 @@ import (
 	"github.com/google/uuid"
 )
 
+// Update implements tea.Model. It handles navigation (tab/shift+tab),
+// saving with Ctrl+S, and routes other events to the focused input.
+// Also updates file existence/size when the file path changes.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:

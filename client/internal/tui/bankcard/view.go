@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+// View implements tea.Model. It renders the bank card form UI.
 func (m Model) View() string {
 	var b strings.Builder
 	b.WriteString("💳 Bank Card Information\n\n")

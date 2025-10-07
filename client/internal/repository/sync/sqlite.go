@@ -12,12 +12,19 @@ import (
 	"github.com/google/uuid"
 )
 
+// Repository provides access to synchronization-related data
+// stored in the local database (outbox, records, sync cursor).
+// It implements the sync.Repository interface and is used by
+// the sync use cases to stage outgoing changes, apply incoming
+// changes, and track sync progress.
 type Repository struct {
 	queries   *db.Queries
 	conn      *sql.DB
 	dbFactory func() (*sql.DB, error)
 }
 
+// New creates a new Repository using the given dbFactory.
+// Connections and sqlc queries are initialized lazily.
 func New(
 	dbFactory func() (*sql.DB, error),
 ) *Repository {
@@ -28,6 +35,9 @@ func New(
 
 var _ sync.Repository = (*Repository)(nil)
 
+// GetBatch returns a batch of messages from the outbox
+// up to the specified limit. These messages represent
+// local changes waiting to be pushed to the server.
 func (r *Repository) GetBatch(ctx context.Context, limit int64) ([]domain.Message, error) {
 	if r.queries == nil {
 		conn, err := r.dbFactory()
@@ -67,6 +77,9 @@ func (r *Repository) GetBatch(ctx context.Context, limit int64) ([]domain.Messag
 	return messages, nil
 }
 
+// DeleteBatch removes a set of messages from the outbox
+// after they have been successfully synchronized with the server.
+// The operation is wrapped in a transaction.
 func (r *Repository) DeleteBatch(ctx context.Context, ids []uuid.UUID) error {
 	if r.queries == nil {
 		conn, err := r.dbFactory()
@@ -95,6 +108,8 @@ func (r *Repository) DeleteBatch(ctx context.Context, ids []uuid.UUID) error {
 	return tx.Commit()
 }
 
+// GetCursor returns the current synchronization cursor,
+// representing the last server_seq successfully applied locally.
 func (r *Repository) GetCursor(ctx context.Context) (int64, error) {
 	if r.queries == nil {
 		conn, err := r.dbFactory()
@@ -108,6 +123,11 @@ func (r *Repository) GetCursor(ctx context.Context) (int64, error) {
 	return r.queries.GetCursor(ctx)
 }
 
+// SaveChanges applies a batch of incoming changes from the server
+// into the local database. For each record, the change is applied
+// only if its UpdatedAtUnix is newer than the local version
+// (last-write-wins conflict resolution). After applying, the
+// local sync cursor is advanced to newCursor.
 func (r *Repository) SaveChanges(ctx context.Context, changes []domain.Message, newCursor int64) error {
 	if r.queries == nil {
 		conn, err := r.dbFactory()
@@ -131,7 +151,7 @@ func (r *Repository) SaveChanges(ctx context.Context, changes []domain.Message, 
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return err
 		}
-		
+
 		if localUpdated > change.UpdatedAtUnix {
 			continue
 		}

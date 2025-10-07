@@ -7,11 +7,15 @@ import (
 	"gophkeeper/client/internal/domain"
 )
 
+// List loads encrypted records from a repository and decrypts them
+// into high-level domain.Record items for display.
 type List struct {
 	repo      Repository
 	decryptor func([]byte) ([]byte, error)
 }
 
+// New creates a List service using the given repository and decryptor.
+// The decryptor must accept a blob (nonce||ciphertext||tag) and return plaintext.
 func New(
 	repo Repository,
 	decryptor func([]byte) ([]byte, error),
@@ -22,6 +26,8 @@ func New(
 	}
 }
 
+// GetAllRecords returns all locally stored records, decrypted and
+// converted into domain.Record items ready for UI rendering.
 func (l List) GetAllRecords() ([]domain.Record, error) {
 	rows, err := l.repo.GetAll(context.Background())
 	if err != nil {

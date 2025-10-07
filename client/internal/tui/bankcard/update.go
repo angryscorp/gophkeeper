@@ -9,6 +9,9 @@ import (
 	"github.com/google/uuid"
 )
 
+// Update implements tea.Model. It handles navigation between fields (up/down),
+// submit with Ctrl+S (validation + save), and routes other key events into the
+// focused text input.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:

@@ -10,6 +10,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Update implements tea.Model for the record creation flow.
+// It routes incoming messages either to the type-selection menu
+// or to the active data-entry submodel (bank card / credentials /
+// text / binary) based on the current route, and returns the next
+// model state and optional command.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.route {
 	case routeTypeSelection:

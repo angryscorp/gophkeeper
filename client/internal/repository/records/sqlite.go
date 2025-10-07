@@ -12,12 +12,19 @@ import (
 	"github.com/google/uuid"
 )
 
+// Repository provides access to user records stored in the local database.
+// It implements both save.Repository and list.Repository use cases.
+// Internally, it uses sqlc-generated queries and maintains a dbFactory
+// for creating new DB connections.
 type Repository struct {
 	queries   *db.Queries
 	conn      *sql.DB
 	dbFactory func() (*sql.DB, error)
 }
 
+// New creates a new Repository using the given dbFactory function.
+// The actual connection and sqlc queries are initialized lazily
+// on the first operation.
 func New(
 	dbFactory func() (*sql.DB, error),
 ) *Repository {
@@ -28,6 +35,9 @@ func New(
 
 var _ save.Repository = (*Repository)(nil)
 
+// Save inserts or updates a record in the local database and enqueues
+// it into the outbox for later synchronization with the server.
+// Both operations are executed within a single transaction.
 func (r *Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid.UUID, payload []byte) error {
 	if r.queries == nil {
 		conn, err := r.dbFactory()
@@ -72,6 +82,8 @@ func (r *Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid
 
 var _ list.Repository = (*Repository)(nil)
 
+// GetAll returns all stored records from the local database,
+// mapped into RawRecord domain objects for further processing or display.
 func (r *Repository) GetAll(ctx context.Context) ([]list.RawRecord, error) {
 	if r.queries == nil {
 		conn, err := r.dbFactory()

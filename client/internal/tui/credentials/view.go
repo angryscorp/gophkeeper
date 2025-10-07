@@ -2,6 +2,9 @@ package credentials
 
 import "strings"
 
+// View implements tea.Model. It renders the credentials form UI,
+// showing username, password, and note fields with navigation and
+// save instructions, or a result message if present.
 func (m Model) View() string {
 	var b strings.Builder
 	b.WriteString("🔑 Credentials\n\n")

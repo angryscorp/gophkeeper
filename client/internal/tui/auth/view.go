@@ -2,6 +2,8 @@ package auth
 
 import "fmt"
 
+// View implements tea.Model. It renders the authentication UI
+// according to the current state of the model.
 func (m Model) View() string {
 	footer := "\n(use enter to submit, ←/esc to return)"
 	switch m.state {

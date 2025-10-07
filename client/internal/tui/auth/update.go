@@ -7,6 +7,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Update implements tea.Model. It drives the auth state machine:
+//  1. ask username -> 2) ask password -> 3) run action -> 4) success/error.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:

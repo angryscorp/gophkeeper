@@ -4,6 +4,9 @@ import (
 	"fmt"
 )
 
+// View implements tea.Model. It renders the list screen UI
+// depending on the current state: loading in progress,
+// successful data display, or an error message.
 func (m Model) View() string {
 	title := "📒 Private Data"
 	footer := "\n(use ←/esc to return)"

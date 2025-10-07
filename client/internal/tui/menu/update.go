@@ -6,6 +6,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Update implements tea.Model for the root menu. It routes incoming
+// messages either to the main menu handler or to the currently active
+// sub-model (register/login/sync/data/new item/help), and handles
+// returning back to the menu on Esc/←/q.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.route {
 	case routeMenu:

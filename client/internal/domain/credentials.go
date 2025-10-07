@@ -6,6 +6,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// Credentials represents a pair of login and password
+// with an optional note.
 type Credentials struct {
 	ID       uuid.UUID
 	Login    string
@@ -13,6 +15,7 @@ type Credentials struct {
 	Note     string
 }
 
+// ToRecord converts Credentials into a generic Record representation.
 func (c Credentials) ToRecord() Record {
 	return Record{
 		ID:            c.ID,
