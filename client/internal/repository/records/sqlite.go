@@ -3,6 +3,7 @@ package records
 import (
 	"context"
 	"database/sql"
+	"sync"
 	"time"
 
 	"gophkeeper/client/internal/domain"
@@ -21,6 +22,7 @@ type Repository struct {
 	queries   *db.Queries
 	conn      *sql.DB
 	dbFactory func() (*sql.DB, error)
+	mu        sync.Mutex
 }
 
 // New creates a new Repository using the given dbFactory function.
@@ -40,13 +42,8 @@ var _ save.Repository = (*Repository)(nil)
 // it into the outbox for later synchronization with the server.
 // Both operations are executed within a single transaction.
 func (r *Repository) Save(ctx context.Context, kind domain.UserDataKind, id uuid.UUID, payload []byte) error {
-	if r.queries == nil {
-		conn, err := r.dbFactory()
-		if err != nil {
-			return err
-		}
-		r.conn = conn
-		r.queries = db.New(conn)
+	if err := r.ensure(); err != nil {
+		return err
 	}
 
 	tx, err := r.conn.BeginTx(ctx, &sql.TxOptions{})
@@ -85,12 +82,8 @@ var _ list.Repository = (*Repository)(nil)
 // GetAll returns all stored records from the local database,
 // mapped into RawRecord domain objects for further processing or display.
 func (r *Repository) GetAll(ctx context.Context) ([]list.RawRecord, error) {
-	if r.queries == nil {
-		conn, err := r.dbFactory()
-		if err != nil {
-			return nil, err
-		}
-		r.queries = db.New(conn)
+	if err := r.ensure(); err != nil {
+		return nil, err
 	}
 
 	rows, err := r.queries.GetRecords(ctx)
@@ -115,4 +108,22 @@ func (r *Repository) GetAll(ctx context.Context) ([]list.RawRecord, error) {
 	}
 
 	return result, nil
+}
+
+func (r *Repository) ensure() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if r.queries != nil {
+		return nil
+	}
+
+	conn, err := r.dbFactory()
+	if err != nil {
+		return err
+	}
+
+	r.conn = conn
+	r.queries = db.New(conn)
+	return nil
 }

@@ -4,24 +4,22 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"sync"
 
 	"gophkeeper/client/internal/domain"
-	"gophkeeper/client/internal/usecase/sync"
-
 	"gophkeeper/client/internal/repository/sync/db"
+	usecasesync "gophkeeper/client/internal/usecase/sync"
 
 	"github.com/google/uuid"
 )
 
 // Repository provides access to synchronization-related data
 // stored in the local database (outbox, records, sync cursor).
-// It implements the sync.Repository interface and is used by
-// the sync use cases to stage outgoing changes, apply incoming
-// changes, and track sync progress.
 type Repository struct {
 	queries   *db.Queries
 	conn      *sql.DB
 	dbFactory func() (*sql.DB, error)
+	mu        sync.Mutex
 }
 
 // New creates a new Repository using the given dbFactory.
@@ -34,19 +32,14 @@ func New(
 	}
 }
 
-var _ sync.Repository = (*Repository)(nil)
+var _ usecasesync.Repository = (*Repository)(nil)
 
 // GetBatch returns a batch of messages from the outbox
 // up to the specified limit. These messages represent
 // local changes waiting to be pushed to the server.
 func (r *Repository) GetBatch(ctx context.Context, limit int64) ([]domain.Message, error) {
-	if r.queries == nil {
-		conn, err := r.dbFactory()
-		if err != nil {
-			return nil, err
-		}
-		r.conn = conn
-		r.queries = db.New(conn)
+	if err := r.ensure(); err != nil {
+		return nil, err
 	}
 
 	res, err := r.queries.ListOutboxBatch(ctx, limit)
@@ -82,13 +75,8 @@ func (r *Repository) GetBatch(ctx context.Context, limit int64) ([]domain.Messag
 // after they have been successfully synchronized with the server.
 // The operation is wrapped in a transaction.
 func (r *Repository) DeleteBatch(ctx context.Context, ids []uuid.UUID) error {
-	if r.queries == nil {
-		conn, err := r.dbFactory()
-		if err != nil {
-			return err
-		}
-		r.conn = conn
-		r.queries = db.New(conn)
+	if err := r.ensure(); err != nil {
+		return err
 	}
 
 	tx, err := r.conn.BeginTx(ctx, &sql.TxOptions{})
@@ -112,15 +100,9 @@ func (r *Repository) DeleteBatch(ctx context.Context, ids []uuid.UUID) error {
 // GetCursor returns the current synchronization cursor,
 // representing the last server_seq successfully applied locally.
 func (r *Repository) GetCursor(ctx context.Context) (int64, error) {
-	if r.queries == nil {
-		conn, err := r.dbFactory()
-		if err != nil {
-			return 0, err
-		}
-		r.conn = conn
-		r.queries = db.New(conn)
+	if err := r.ensure(); err != nil {
+		return 0, err
 	}
-
 	return r.queries.GetCursor(ctx)
 }
 
@@ -130,13 +112,8 @@ func (r *Repository) GetCursor(ctx context.Context) (int64, error) {
 // (last-write-wins conflict resolution). After applying, the
 // local sync cursor is advanced to newCursor.
 func (r *Repository) SaveChanges(ctx context.Context, changes []domain.Message, newCursor int64) error {
-	if r.queries == nil {
-		conn, err := r.dbFactory()
-		if err != nil {
-			return err
-		}
-		r.conn = conn
-		r.queries = db.New(conn)
+	if err := r.ensure(); err != nil {
+		return err
 	}
 
 	tx, err := r.conn.BeginTx(ctx, &sql.TxOptions{})
@@ -174,4 +151,22 @@ func (r *Repository) SaveChanges(ctx context.Context, changes []domain.Message, 
 	}
 
 	return tx.Commit()
+}
+
+func (r *Repository) ensure() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if r.queries != nil {
+		return nil
+	}
+
+	conn, err := r.dbFactory()
+	if err != nil {
+		return err
+	}
+
+	r.conn = conn
+	r.queries = db.New(conn)
+	return nil
 }
