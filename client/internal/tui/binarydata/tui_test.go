@@ -2,10 +2,11 @@ package binarydata
 
 import (
 	"errors"
-	"gophkeeper/client/internal/domain"
 	"os"
 	"strings"
 	"testing"
+
+	"gophkeeper/client/internal/domain"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

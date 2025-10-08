@@ -1,9 +1,10 @@
 package record
 
 import (
-	"gophkeeper/client/internal/domain"
 	"strings"
 	"testing"
+
+	"gophkeeper/client/internal/domain"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

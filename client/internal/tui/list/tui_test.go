@@ -2,9 +2,10 @@ package list
 
 import (
 	"errors"
-	"gophkeeper/client/internal/domain"
 	"strings"
 	"testing"
+
+	"gophkeeper/client/internal/domain"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
