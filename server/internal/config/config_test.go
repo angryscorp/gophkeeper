@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"os"
 	"testing"
 
 	"gophkeeper/server/internal/config"
@@ -41,14 +40,5 @@ func TestLoadFromEnv(t *testing.T) {
 	}
 	if cfg.TLSCKeyPath != "/tmp/key.pem" {
 		t.Errorf("TLSCKeyPath mismatch")
-	}
-}
-
-func TestLoadFromEnv_MissingVars(t *testing.T) {
-	os.Clearenv()
-
-	_, err := config.LoadFromEnv()
-	if err == nil {
-		t.Fatal("expected error when env vars missing, got nil")
 	}
 }

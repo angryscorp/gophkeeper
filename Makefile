@@ -45,3 +45,7 @@ gen-keys:
 lint:
 	goimports -w .
 	gofumpt -l -w .
+
+.PHONY: test
+test:
+	go test -v -race ./...
