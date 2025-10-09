@@ -1,8 +1,25 @@
 package binarydata
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
+// View implements tea.Model. It renders the binary data form UI,
+// showing the file path input, file existence/size status, description
+// input, and context-sensitive instructions at the bottom.
 func (m Model) View() string {
+	var b strings.Builder
+	b.WriteString("📁 Binary Data\n\n")
+
+	if m.resultMsg != "" {
+		b.WriteString(m.resultMsg)
+		b.WriteString("\n\n(use enter/space to reset, ←/esc to return)")
+		return b.String()
+	}
+
+	b.WriteString("File Path:\n" + m.fields[0].input.View() + "\n")
+
 	fileStatus := ""
 	filePath := m.fields[0].input.Value()
 
@@ -17,20 +34,17 @@ func (m Model) View() string {
 		}
 	}
 
-	view := "📁 Binary Data\n\n" +
-		"File Path:\n" + m.fields[0].input.View() + "\n"
-
 	if fileStatus != "" {
-		view += fileStatus + "\n"
+		b.WriteString(fileStatus + "\n")
 	}
 
-	view += "\nDescription:\n" + m.fields[1].input.View() + "\n\n"
+	b.WriteString("\nDescription:\n" + m.fields[1].input.View() + "\n\n")
 
 	if m.fileExists {
-		view += "(tab to switch fields, ctrl+s to save, ←/esc to return)"
+		b.WriteString("(tab to switch fields, ctrl+s to save, ←/esc to return)")
 	} else {
-		view += "(enter valid file path to enable saving, tab to switch fields, ←/esc to return)"
+		b.WriteString("(enter valid file path to enable saving, tab to switch fields, ←/esc to return)")
 	}
 
-	return view
+	return b.String()
 }

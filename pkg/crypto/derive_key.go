@@ -41,6 +41,8 @@ func DeriveAuthKey(key, info []byte) ([]byte, error) {
 	return authKey, nil
 }
 
+// SignChallenge computes an HMAC signature of the given challenge
+// using the provided authKey and algorithm.
 func SignChallenge(authKey, challenge []byte, algo AuthKeyAlgorithm) []byte {
 	var sha func() hash.Hash
 	switch algo {

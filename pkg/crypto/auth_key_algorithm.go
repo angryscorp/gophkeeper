@@ -4,7 +4,9 @@ package crypto
 type AuthKeyAlgorithm string
 
 const (
+	// AuthKeyAlgorithmHMACSHA256 uses HMAC with SHA-256.
 	AuthKeyAlgorithmHMACSHA256 AuthKeyAlgorithm = "HMAC_SHA256"
+	// AuthKeyAlgorithmHMACSHA512 uses HMAC with SHA-512.
 	AuthKeyAlgorithmHMACSHA512 AuthKeyAlgorithm = "HMAC_SHA512"
 )
 

@@ -10,6 +10,9 @@ import (
 
 const ctxTimeout = 5 * time.Second
 
+// CreatePGXPool creates a new pgx connection pool from the given DSN,
+// verifies the configuration, and ensures the database is reachable
+// with a ping. It applies a 5-second context timeout.
 func CreatePGXPool(dsn string) (*pgxpool.Pool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()

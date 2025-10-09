@@ -1,6 +1,19 @@
 package textdata
 
+import "strings"
+
+// View renders the text data form UI, showing title and content fields,
+// highlighting the focused one and displaying result messages if present.
 func (m Model) View() string {
+	var b strings.Builder
+	b.WriteString("📝 Text Data\n\n")
+
+	if m.resultMsg != "" {
+		b.WriteString(m.resultMsg)
+		b.WriteString("\n\n(use enter/space to reset, ←/esc to return)")
+		return b.String()
+	}
+
 	titleStyle := ""
 	contentStyle := ""
 
@@ -10,8 +23,9 @@ func (m Model) View() string {
 		contentStyle = " (focused)"
 	}
 
-	return "📝 Text Data\n\n" +
-		"Title" + titleStyle + ":\n" + m.title.View() + "\n\n" +
-		"Content" + contentStyle + ":\n" + m.content.View() + "\n\n" +
-		"(tab to switch fields, ctrl+s to save, ←/esc to return)"
+	b.WriteString("Title" + titleStyle + ":\n" + m.title.View() + "\n\n")
+	b.WriteString("Content" + contentStyle + ":\n" + m.content.View() + "\n\n")
+	b.WriteString("(tab to switch fields, ctrl+s to save, ←/esc to return)")
+
+	return b.String()
 }

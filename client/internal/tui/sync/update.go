@@ -4,6 +4,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Update handles sync commands and results, updating the state
+// to InProgress, Success, or Error, and returning the next command.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case baseCmd:

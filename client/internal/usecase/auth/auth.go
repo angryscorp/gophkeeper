@@ -3,10 +3,10 @@ package auth
 import (
 	"context"
 	"fmt"
-	"gophkeeper/client/internal/repository/tokens"
+	"time"
+
 	"gophkeeper/pkg/crypto"
 	"gophkeeper/pkg/device"
-	"time"
 )
 
 const (
@@ -14,27 +14,31 @@ const (
 	ctxTimeout  = 5 * time.Second
 )
 
-type Client interface {
-	Register(ctx context.Context, username string, kdf crypto.KDFParameters, edKey, authKey []byte, algorithm crypto.AuthKeyAlgorithm) error
-	LoginStart(ctx context.Context, username string, deviceName string) (crypto.LoginPayload, error)
-	LoginFinish(ctx context.Context, username, deviceName string, challenge []byte) (string, error)
-}
-
+// Auth coordinates client/server authentication and secure
+// storage of keys and tokens. It handles registration and login.
 type Auth struct {
-	client Client
-	repo   tokens.Tokens
+	client        Client
+	repo          Tokens
+	dataKeySetter func(dataKey []byte)
 }
 
+// New creates a new Auth service with a client, token repo,
+// and a setter function for the derived data key.
 func New(
 	client Client,
-	repo tokens.Tokens,
+	repo Tokens,
+	dataKeySetter func(dataKey []byte),
 ) *Auth {
 	return &Auth{
-		client: client,
-		repo:   repo,
+		client:        client,
+		repo:          repo,
+		dataKeySetter: dataKeySetter,
 	}
 }
 
+// Register creates a new user account. It derives a master key
+// from the password, generates and encrypts a data key, derives
+// an auth key, and sends the parameters to the server.
 func (auth *Auth) Register(username, password string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
@@ -72,6 +76,10 @@ func (auth *Auth) Register(username, password string) error {
 	)
 }
 
+// Login authenticates an existing user. It performs the
+// challenge/response handshake with the server, decrypts
+// the stored data key, unlocks the local repo, and saves
+// the access token.
 func (auth *Auth) Login(username, password string) error {
 	deviceName := device.GenerateDeviceName()
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
@@ -121,6 +129,8 @@ func (auth *Auth) Login(username, password string) error {
 	if err != nil {
 		return err
 	}
+
+	auth.dataKeySetter(dataKey)
 
 	return nil
 }

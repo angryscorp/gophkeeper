@@ -8,6 +8,9 @@ import (
 	"strings"
 )
 
+// GenerateDeviceName builds a unique device name from OS, arch,
+// current username, and hostname. Spaces are replaced with dashes
+// and the result is lowercased.
 func GenerateDeviceName() string {
 	username := "unknown"
 	if currentUser, err := user.Current(); err == nil {

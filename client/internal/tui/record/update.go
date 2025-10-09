@@ -10,6 +10,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Update implements tea.Model for the record creation flow.
+// It routes incoming messages either to the type-selection menu
+// or to the active data-entry submodel (bank card / credentials /
+// text / binary) based on the current route, and returns the next
+// model state and optional command.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.route {
 	case routeTypeSelection:
@@ -37,6 +42,7 @@ func handleSubModelUpdate(m Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	return m, cmd
 }
+
 func (m Model) update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -61,16 +67,16 @@ func (m Model) initSubModel() (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch m.route {
 	case routeBankCardForm:
-		m.bankCard = bankcard.New()
+		m.bankCard = bankcard.New(m.dataSaver.SaveBankCard)
 		cmd = m.bankCard.Init()
 	case routeCredentialsForm:
-		m.credentials = credentials.New()
+		m.credentials = credentials.New(m.dataSaver.SaveCredentials)
 		cmd = m.credentials.Init()
 	case routeTextDataForm:
-		m.textData = textdata.New()
+		m.textData = textdata.New(m.dataSaver.SaveUserTextData)
 		cmd = m.textData.Init()
 	case routeBinaryDataForm:
-		m.binaryData = binarydata.New()
+		m.binaryData = binarydata.New(m.dataSaver.SaveUserBinaryData)
 		cmd = m.binaryData.Init()
 	default:
 	}

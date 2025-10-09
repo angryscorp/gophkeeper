@@ -1,18 +1,12 @@
 package tokens
 
 import (
-	"time"
-
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// AccessClaims defines the JWT claims used in access tokens.
+// It embeds standard registered claims and adds a custom DeviceID field.
 type AccessClaims struct {
 	jwt.RegisteredClaims
 	DeviceID string `json:"device_id"`
-}
-
-type Claims struct {
-	Sub      string // user_id (UUID as string)
-	DeviceID string
-	Exp      time.Time
 }

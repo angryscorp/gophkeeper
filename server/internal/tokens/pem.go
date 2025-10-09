@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+// LoadPrivateKey reads an Ed25519 private key from a PEM file in PKCS8 format.
 func LoadPrivateKey(filePath string) (ed25519.PrivateKey, error) {
 	pemBytes, err := os.ReadFile(filePath)
 	if err != nil {
@@ -29,6 +30,7 @@ func LoadPrivateKey(filePath string) (ed25519.PrivateKey, error) {
 	return pk, nil
 }
 
+// LoadPublicKey reads an Ed25519 public key from a PEM file in PKIX format.
 func LoadPublicKey(filePath string) (ed25519.PublicKey, error) {
 	pemBytes, err := os.ReadFile(filePath)
 	if err != nil {

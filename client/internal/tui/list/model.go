@@ -1,33 +1,35 @@
 package list
 
 import (
+	"gophkeeper/client/internal/domain"
+
 	"github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Model is a Bubble Tea model for browsing and displaying
+// a list of stored records (credentials, cards, notes, etc.)
+// retrieved via the provided data factory function.
 type Model struct {
-	List list.Model
+	list        list.Model
+	dataFactory func() ([]domain.Record, error)
+	state       state
+	err         error
 }
 
-type Item struct{ title, desc string }
+// New creates a new list Model with a title and the given
+// data factory callback, which is used to load records.
+func New(dataFactory func() ([]domain.Record, error)) Model {
+	l := list.New(nil, list.NewDefaultDelegate(), 0, 0)
+	l.Title = "📒 Private Data"
+	return Model{list: l, dataFactory: dataFactory}
+}
 
-func (i Item) Title() string       { return i.title }
-func (i Item) Description() string { return i.desc }
-func (i Item) FilterValue() string { return i.title }
-
-func New(items []list.Item) Model {
-	if items == nil {
-		// demo data
-		items = []list.Item{
-			Item{title: "Google Account", desc: "Credentials"},
-			Item{title: "My Notes", desc: "Text data"},
-			Item{title: "Swedbank", desc: "Bank Card"},
-			Item{title: "Revolut", desc: "Bank Card"},
-			Item{title: "My photo", desc: "Binary Data"},
-		}
-	}
-
-	m := Model{List: list.New(items, list.NewDefaultDelegate(), 0, 0)}
-	m.List.SetShowTitle(false)
-
-	return m
+// Init implements tea.Model. It initializes the list by
+// requesting the window size and loading data.
+func (m Model) Init() tea.Cmd {
+	return tea.Batch(
+		tea.WindowSize(),
+		cmdLoadData.Run,
+	)
 }

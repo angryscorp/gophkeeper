@@ -1,10 +1,11 @@
 package main
 
 import (
-	"gophkeeper/server/internal/config"
-	"gophkeeper/server/internal/repository/migration"
 	"log"
 	"time"
+
+	"gophkeeper/server/internal/config"
+	"gophkeeper/server/internal/repository/migration"
 )
 
 const (

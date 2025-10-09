@@ -1,3 +1,13 @@
+# GitHub Actions Workflow: Build Cross-Platform Client Binaries
+#
+# This workflow compiles the GophKeeper client for multiple platforms (Linux, Windows, macOS)
+# whenever changes are pushed to the "dev" branch.
+# - Uses a build matrix to cover different GOOS/GOARCH combinations
+# - Installs required dependencies (SQLCipher, cross-compilers)
+# - Injects version and build time into binaries via ldflags
+# - Produces both static (Linux) and dynamic (Windows/macOS) builds
+# - Uploads generated binaries as GitHub Actions artifacts for download
+#
 name: Build Cross-Platform
 
 on:

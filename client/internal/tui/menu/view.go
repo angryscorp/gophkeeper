@@ -2,6 +2,9 @@ package menu
 
 import "fmt"
 
+// View implements tea.Model for the root menu. It renders either
+// the main menu or the currently active sub-model screen depending
+// on the current route.
 func (m Model) View() string {
 	switch m.route {
 	case routeMenu:

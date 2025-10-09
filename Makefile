@@ -40,3 +40,12 @@ gen-keys:
 	@openssl genpkey -algorithm Ed25519 -out server/keys/ed25519.key
 	@openssl pkey -in server/keys/ed25519.key -pubout -out server/keys/ed25519.pub
 	@echo "Keys generated in ./server/keys/"
+
+.PHONY: lint
+lint:
+	goimports -w .
+	gofumpt -l -w .
+
+.PHONY: test
+test:
+	go test -v -race ./...

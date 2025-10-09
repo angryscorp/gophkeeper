@@ -13,10 +13,13 @@ import (
 type menuItem struct {
 	title       string
 	description string
-	infoType    domain.UserInfoType
 	route       recordRoute
 }
 
+// Model is a Bubble Tea model for creating new records.
+// It starts with a type-selection menu and routes into
+// one of the data entry forms (bank card, credentials,
+// text data, binary data).
 type Model struct {
 	route     recordRoute
 	cursor    int
@@ -26,41 +29,44 @@ type Model struct {
 	credentials credentials.Model
 	textData    textdata.Model
 	binaryData  binarydata.Model
+
+	dataSaver domain.UserInfoSaver
 }
 
-func New() Model {
+// New creates a new record creation Model, wiring it
+// with the provided data saver and initializing the
+// menu of available record types.
+func New(dataSaver domain.UserInfoSaver) Model {
 	return Model{
 		route:  routeTypeSelection,
 		cursor: 0,
 		menuItems: []menuItem{
 			{
-				title:       "💳 Bank Card",
-				description: "Credit/Debit card information",
-				infoType:    domain.UserInfoTypeBankCard,
+				title:       domain.UserDataKindBankCard.Title(),
+				description: domain.UserDataKindBankCard.Description(),
 				route:       routeBankCardForm,
 			},
 			{
-				title:       "🔑 Credentials",
-				description: "Username and password",
-				infoType:    domain.UserInfoTypeCredentials,
+				title:       domain.UserDataKindCredentials.Title(),
+				description: domain.UserDataKindCredentials.Description(),
 				route:       routeCredentialsForm,
 			},
 			{
-				title:       "📝 Text Data",
-				description: "Notes and text information",
-				infoType:    domain.UserInfoTypeUserTextData,
+				title:       domain.UserDataKindTextData.Title(),
+				description: domain.UserDataKindTextData.Description(),
 				route:       routeTextDataForm,
 			},
 			{
-				title:       "📁 Binary Data",
-				description: "Files and binary information",
-				infoType:    domain.UserInfoTypeUserBinaryData,
+				title:       domain.UserDataKindBinaryData.Title(),
+				description: domain.UserDataKindBinaryData.Description(),
 				route:       routeBinaryDataForm,
 			},
 		},
+		dataSaver: dataSaver,
 	}
 }
 
+// Init implements tea.Model. It performs no initialization.
 func (m Model) Init() tea.Cmd {
 	return nil
 }
